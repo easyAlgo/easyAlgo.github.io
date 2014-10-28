@@ -1,0 +1,13 @@
+{
+    "name": "easyCode",
+    "dependencies": {
+        "less": "latest",
+        "bootstrap": "latest",
+		"requirejs" : "latest",
+		"angular-bootstrap" : "latest",
+		"angular-ui-codemirror" : "latest",
+		"angular-route" : "1.2.26",
+		"idb.filesystem.js" : "ebidel/idb.filesystem.js",
+		"ng-flow" : "latest"
+    }
+}
