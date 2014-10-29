@@ -1,5 +1,5 @@
 ﻿
-define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], function(app, easyCodeConfiguration, Parser){
+define(['app', 'easyAlgoConfiguration', 'easyAlgoParser', 'controllers/popUp'], function(app, easyAlgoConfiguration, Parser){
 
 	var formValidator = {
 		isEmpty : function(value) {
@@ -20,11 +20,26 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 					return false;	
 				}
 			}
-			return values.varName != undefined ;
+			return values.varname != undefined ;
+		},
+		'if' : function(values) {
+			return !this.isEmpty(values.test);
+		},
+		'while' : function(values) {
+			return !this.isEmpty(values.test);
+		},
+		'foreach' : function(values) {
+			return !this.isEmpty(values.varname) && !this.isEmpty(values.array);	
+		},
+		'for' : function(values) {
+			return !this.isEmpty(values.varname) && !this.isEmpty(values.start) && !this.isEmpty(values.end);		
 		}
 	};
 	
 	var codeConstructor = {
+		tabulate : function(lines){
+			return lines.replace(/\n/g, '\n\t');
+		},
 		escapeString : function(string) {
 			return string.replace(/"/g, '\\"');
 		},
@@ -45,13 +60,12 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 		},
 		// définir varname vartype
 		'define' : function(context, values) {
-			return {code : 'DEFINIR ' + values.varname + ' ' + values.type};
+			return {code : 'definir ' + values.varname + ' ' + values.type};
 		},
 		'read' : function(context, values ) {
-			return {code : 'LIRE ' + values.varname};
+			return {code : 'lire ' + values.varname};
 		},
 		'afectation' : function(context, values) {
-			var varname = values.varName;
 			var vartype = values.varType;
 			var expression = undefined;
 			console.log(vartype);
@@ -83,7 +97,7 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 					}
 					expression += ']';
 				} else if (values.arrayType == 3) {
-					values.varName += '[' + (values.index || '') + ']';
+					values.varname += '[' + (values.index || '') + ']';
 				}
 			}
 			
@@ -91,7 +105,7 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 				expression = this.refactorExpression(context, values.expression);
 			}
 
-			return {code : values.varName + ' = ' + expression}
+			return {code : values.varname + ' = ' + expression}
 		},
 		'write' : function(context, values) {
 			var expression = undefined;
@@ -104,7 +118,72 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 				expression = this.refactorExpression(context, values.expression);
 			}
 			
-			return {code : 'ECRIRE ' + expression + (values.output ? ' \''+values.output+'\'' : '')}
+			return {code : 'ecrire ' + expression + (values.output ? ' \''+values.output+'\'' : '')}
+		},
+		'if' : function(context, values, selectedCode) {
+			var code = 'si ' + values.test + '\n';
+			if (selectedCode) {
+				code += '\t' + this.tabulate(selectedCode.trim());
+			} else {
+				code += '\t' + '// code si le test est vrai';
+			}
+			
+			if (values.elseBlock) {
+				code += '\nSI_NON\n\t//code si le test est faux';
+			}
+			code += '\nFIN_SI';
+
+			return {overrideSelection : true, code : code};
+		},
+		'while' : function(context, values, selectedCode) {
+			var code = 'tant_que ' + values.test + '\n';
+			if (selectedCode) {
+				code += '\t' + this.tabulate(selectedCode.trim());
+			} else {
+				code += '\t' + '// code executé dans la boucle';
+			}
+			
+			code += '\nfin_tant_que';
+
+			return {overrideSelection : true, code : code};
+		},
+		'foreach' : function(context, values, selectedCode) {
+			var code = '';
+			if (!context.isset(values.varname, false)) {
+				code = 'definir ' + values.varname + ' chaine // attention vérifier le type de la variable \n';
+			}
+
+			code += 'pour ' + values.varname + ' dans ' + values.array + '\n';
+			if (selectedCode) {
+				code += '\t' + this.tabulate(selectedCode.trim());
+			} else {
+				code += '\t' + '// code executé pour chaques element du tableau';
+			}			
+			code += '\nfin_pour';
+
+			return {overrideSelection : true, code : code};
+		},
+		'for' : function(context, values, selectedCode) {
+			var code = '';
+			if (!context.isset(values.varname, false)) {
+				code = 'definir ' + values.varname + ' nombre\n';
+			}
+
+			code += 'pour ' + values.varname + ' de ' + values.start + ' a ' + values.end;
+			if (values.step) {
+				code += ' par ' + values.step;
+			}
+			code += '\n';
+
+			if (selectedCode) {
+				code += '\t' + this.tabulate(selectedCode.trim());
+			} else {
+				code += '\t' + '// code executé pour chaques element du tableau';
+			}			
+			
+			code += '\nfin_pour';
+
+			return {overrideSelection : true, code : code};
 		}
 	};
 	
@@ -119,28 +198,44 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 				'Définir une variable' : {id : 'define', title : 'Définir une variable'},
 				'Lire une variable' : {id : 'read', title : 'Lire une variable'},
 				'Ecrire un message' : {id : 'write', title : 'Ecrire un message'},
-				'Afecter une variable' : {id : 'afectation', title : 'Afectation d\'une variable'}
+				'Afecter une variable' : {id : 'afectation', title : 'Afectation d\'une variable'},
+				'position' : 1
 			}, 
 			'Structure conditionelle' : {
-				'Si' : {id : 'if'}
+				'Si' : {id : 'if', title : 'Condition'},
+				'position' : 2
 			}, 
 			'Structure itérative' : {
-				'Execution tant que vrai' : {id:'while'},
-				'Parcour d\'un tableau' : {id:'for'},
-				'Parcour entre deux nombres' : {id:'foreach'}
+				'Execution tant que vrai' : {id:'while', 'title' : 'Boucle tant que'},
+				'Parcour entre deux nombres' : {id:'for', 'title' : 'Boucle pour'},
+				'Parcour d\'un tableau' : {id:'foreach', 'title' : 'Boucle pour chaque'},
+				'position' : 3
+			},
+			'Aide' : {
+				'Liste de fonctions' : {type : 'help', id : 'functions', title : 'Fonctions'},
+				'Liste des variables' : {type : 'help', id : 'variables', title : 'Variables'},
+				'position' : 4
 			}
 		};
 
 		
-		$scope.configuration = easyCodeConfiguration;
+		$scope.configuration = easyAlgoConfiguration;
 		$scope.selected = undefined;
 		$scope.setSelected = function(menu) {
-			if ($scope.selected) {
-				$scope.selected.selected = false;
+			if (menu.type == 'help') {
+				$scope.help = menu;
+			} else {
+				if ($scope.selected) {
+					$scope.selected.selected = false;
+				}
+				$scope.selected = menu;
+				menu.selected = true;
+				$scope.isValidated = false;				
 			}
-			$scope.selected = menu;
-			menu.selected = true;
-			$scope.isValidated = false;
+		};
+
+		$scope.closeHelp = function(){
+			$scope.help = undefined;
 		};
 
 		// init vars selectionnales
@@ -150,8 +245,15 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 		var pos = codeMirror.indexFromPos(codeMirror.getCursor());
 		var context = parsed.context.getContextFor(pos);
 		
+		console.log(parsed.context);
 		$scope.vars = context.getAccessibleVars();
+		$scope.functions = easyAlgoConfiguration.getFunctions();
+		$scope.accessibleFunctions = context.getAccessibleFunctions();
 		
+		
+		console.log($scope.functions);
+		$scope.functionsDescription = easyAlgoConfiguration.getFunctionsDescription();
+
 		$scope.removeArray = function(index) {
 			$scope.selected.arrayValues.splice(index, 1);
 		};
@@ -183,7 +285,7 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 		// when the popup is closed
 		$modalInstance.result.then(function () {
 			// no selection just close the popup
-			if (!$scope.selected) {
+			if (!$scope.selected || !($scope.selected.id in codeConstructor)) {
 				return ;
 			}
 			
@@ -195,7 +297,7 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 				return tab;
 			}
 			
-			var easyCodeMod = codeMirror.getMode({},"easyCode");
+			var easyAlgoMod = codeMirror.getMode({},"easyAlgo");
 
 			// timeout is used because replaceRange do digest error
 			$timeout(function(){				
@@ -204,23 +306,35 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 		     	// new line of code
 		     	var newLine = undefined;
 		     	// must remove the selected code
-		     	var overrideSelection = false;
-		     	
-		     	// create the line of core
-		     	if (selected.id in codeConstructor) {	     		
-		     		var value  = codeConstructor[selected.id](context, selected);
-					newLine = value.code;
-		     	}
+		     	var overrideSelection = false;	
 
-		     	var start = selection.head; 
-		     	var end = overrideSelection ? selection.anchor : selection.head;
+		     	// check if start == end
+		     	var selectedCode = undefined;
+		     	if(!(selection.head.line == selection.anchor.line && selection.head.ch == selection.anchor.ch)) {
+			     	var startSelected = CodeMirror.Pos(selection.head.line, 0);
+			     	var endLineSelected = codeMirror.getLine(selection.anchor.line);
+					var endSelected = CodeMirror.Pos(selection.anchor.line, endLineSelected.length);
+					selectedCode = codeMirror.getRange(startSelected, endSelected);
+				}
+
+	     		var value  = codeConstructor[selected.id](context, selected, selectedCode);
+				newLine = value.code;
+				overrideSelection = value.overrideSelection || false;		     	
+
+		     	var start = overrideSelection && selectedCode ? startSelected : selection.head; 
+		     	var end = overrideSelection && selectedCode ? endSelected : selection.head;
 
 				// indent correctly the current line
 				var token = codeMirror.getTokenAt(start);
-				var indentNumber = easyCodeMod.indent(token.state, newLine);
-				newLine = tabulate(indentNumber) + newLine;
-				
-																	
+				var indentNumber = easyAlgoMod.indent(token.state, newLine);
+
+				// tabulate 
+				var stringTabulate = tabulate(indentNumber);	
+				console.log(newLine);
+				newLine = stringTabulate + newLine;
+				newLine = newLine.replace(/\n/g, '\n' + stringTabulate);				
+				console.log(newLine);
+
 		     	// already add a new line end add the code at the end of line
 		     	var beforeCursor = codeMirror.getRange(CodeMirror.Pos(start.line, 0), start);
 				var line = codeMirror.getLine(start.line);
@@ -231,7 +345,7 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 		     	} else if (line.trim().length > 0){
 					// if we are at start on an existing line add the line before this line
 					start.ch = 0;
-					newLine = newLine + '\n';
+					newLine = newLine + (overrideSelection ? '' : '\n' );
 				} else {
 					// empty line add the line on this line
 					start.ch = 0;
@@ -247,5 +361,5 @@ define(['app', 'easyCodeConfiguration', 'easyCodeParser', 'controllers/popUp'], 
 				codeMirror.setSelection(start, start);
 			})
 	    });
-	})
+	});
 });

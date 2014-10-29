@@ -1,5 +1,5 @@
 {
-    "name": "easyCode",
+    "name": "easyAlgo",
     "dependencies": {
         "less": "latest",
         "bootstrap": "latest",
@@ -8,6 +8,7 @@
 		"angular-ui-codemirror" : "latest",
 		"angular-route" : "1.2.26",
 		"idb.filesystem.js" : "ebidel/idb.filesystem.js",
-		"ng-flow" : "latest"
+		"ng-flow" : "latest",
+		"tc-angular-chartjs" : "latest"
     }
 }

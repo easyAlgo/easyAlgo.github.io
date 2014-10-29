@@ -24,6 +24,43 @@ define(['app'], function(app){
                 }
             });
         };
+    }).filter('orderObjectBy', function() {
+	  return function(items, field, reverse) {
+	    var filtered = [];
+	    
+	    console.log(field, reverse);
+	    angular.forEach(items, function(item, key) {
+	    	item.key = key;
+	      filtered.push(item);
+	    });
+	    
+	    filtered.sort(function (a, b) {
+	      return (a[field] > b[field] ? 1 : -1);
+	    });
+
+	    if(reverse) filtered.reverse();
+	    return filtered;
+	  };
+	}).filter('isEmpty', function () {
+        var bar;
+        return function (obj) {
+            for (bar in obj) {
+                if (obj.hasOwnProperty(bar)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }).filter('notEmpty', function () {
+        var bar;
+        return function (obj) {
+            for (bar in obj) {
+                if (obj.hasOwnProperty(bar)) {
+                    return true;
+                }
+            }
+            return false;
+        };
     });
 
 });

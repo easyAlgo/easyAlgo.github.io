@@ -167,6 +167,7 @@ angular.module('vtortola.ng-terminal', [])
         if (!output.added) {
             output.added = true;
             $scope.results.push(output);
+			$scope.$$phase || $scope.$apply();
         }
     });
 
@@ -367,23 +368,34 @@ angular.module('vtortola.ng-terminal', [])
                             }
                         });
 
-                        function type(input, line, i, endCallback) {
+                        function type(input, line, i, callbackFactory) {
                             setTimeout(function () {
                                 scope.typeSound();
                                 input.textContent += (i<line.length?line[i]:'');
 
                                 if (i < line.length - 1) {
                                     scope.typeSound();
-                                    type(input, line, i + 1, endCallback);
+                                    type(input, line, i + 1, callbackFactory);
                                 }
-                                else if (endCallback)
-                                    endCallback();
+                                else if (callbackFactory) {
+                                    var callback = callbackFactory();
+									if (callback) {
+										callback();
+									}
+								}
                             }, scope.outputDelay);
                         }
 
-                        scope.$watchCollection(function () { return scope.results; }, function (newValues, oldValues) {
+						function endOfPrint() {
+							scope.showPrompt = true;
+							scope.$$phase || scope.$apply();
+							consoleView[0].scrollTop = consoleView[0].scrollHeight;	
+							f  = [];
+						}
+						var f = [];
 							
-                            if (oldValues.length && !newValues.length) { // removal detected
+                        scope.$watchCollection(function () { return scope.results; }, function (newValues, oldValues) {
+							if (oldValues.length && !newValues.length) { // removal detected
                                 var children = results.children();
                                 for (var i = 0; i < children.length; i++) {
                                     children[i].remove();
@@ -391,12 +403,14 @@ angular.module('vtortola.ng-terminal', [])
                             }
 
                             scope.showPrompt = false;
-                            var f = [];
-                            var nbLineToWrite = 0;
+                           
+                            var nbLineToWrite = f.length;
+							var beforeFLength = f.length;
                             for (var j = 0; j < newValues.length; j++) {
 
                                 var newValue = newValues[j];
-                                if (newValue.displayed)
+								
+								if (newValue.displayed)
                                     continue;
 
                                 newValue.displayed = true;
@@ -418,9 +432,8 @@ angular.module('vtortola.ng-terminal', [])
                                                 var wtextLine = textLine;
                                                 
                                                 var wbreak = i == newValue.text.length - 1 && newValue.breakLine;
-                                                f.push(function () {
-													var wf = f[fi];
-													results[0].appendChild(wline); type(wline, wtextLine, 0, wf);
+                                                f.push(function () {											
+													results[0].appendChild(wline); type(wline, wtextLine, 0, function(){return f[fi] || endOfPrint;});
                                                     consoleView[0].scrollTop = consoleView[0].scrollHeight;
                                                     if (wbreak) {
                                                         var breakLine = document.createElement('br');
@@ -447,17 +460,12 @@ angular.module('vtortola.ng-terminal', [])
                                         var breakLine = document.createElement('br');
                                         results[0].appendChild(breakLine);
                                     }
-                                }
-                    
+                                }                    
                             }
                             
-							f.push(function () {
-                                scope.showPrompt = true;
-                                scope.$$phase || scope.$apply();
-                                consoleView[0].scrollTop = consoleView[0].scrollHeight;
-                            });
-
-                            f[0]();
+							if (beforeFLength == 0 && f.length > 0) {
+								f[0]();
+							}
                         });
 
                 }

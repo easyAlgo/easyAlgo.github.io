@@ -4,9 +4,9 @@ define([], function()
         defaultRoutePath: '/',
         routes: {
             '/': {
-                controller : 'easyCodeEditor',
+                controller : 'easyAlgoEditor',
                 dependencies: [
-                    'controllers/easyCodeEditor',
+                    'controllers/easyAlgoEditor',
                     'directives/directives'
                 ]
             }

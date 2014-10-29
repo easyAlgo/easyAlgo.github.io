@@ -12,16 +12,16 @@ require.config({
 		angular : 'angular/angular.min',
 		angularBootstrap : 'angular-bootstrap/ui-bootstrap-tpls.min',
 		angularRoute : 'angular-route/angular-route.min',
-		easyCodeParser : '../javascripts/easyCodeLanguage/easyCodeParser',
-		easyCodeRunner : '../javascripts/easyCodeLanguage/easyCodeRunner',
-		easyCodeLint : '../javascripts/easyCodeLanguage/easyCodeLint',
-		easyCodeFold : '../javascripts/easyCodeLanguage/easyCodeFold',
-		easyCodeCloseTag : '../javascripts/easyCodeLanguage/easyCodeCloseTag',
-		easyCodeValidator : '../javascripts/easyCodeLanguage/easyCodeValidator',
-		easyCodeConfiguration : '../javascripts/easyCodeLanguage/easyCodeConfiguration',
-		easyCodeSyntaxHighlighter : '../javascripts/easyCodeLanguage/easyCodeSyntaxHighlighter',
-		easyCodeContext : '../javascripts/easyCodeLanguage/easyCodeContext',
-		easyCodeRuntimeException : '../javascripts/easyCodeLanguage/easyCodeRuntimeException',
+		easyAlgoParser : '../javascripts/easyAlgoLanguage/easyAlgoParser',
+		easyAlgoRunner : '../javascripts/easyAlgoLanguage/easyAlgoRunner',
+		easyAlgoLint : '../javascripts/easyAlgoLanguage/easyAlgoLint',
+		easyAlgoFold : '../javascripts/easyAlgoLanguage/easyAlgoFold',
+		easyAlgoCloseTag : '../javascripts/easyAlgoLanguage/easyAlgoCloseTag',
+		easyAlgoValidator : '../javascripts/easyAlgoLanguage/easyAlgoValidator',
+		easyAlgoConfiguration : '../javascripts/easyAlgoLanguage/easyAlgoConfiguration',
+		easyAlgoSyntaxHighlighter : '../javascripts/easyAlgoLanguage/easyAlgoSyntaxHighlighter',
+		easyAlgoContext : '../javascripts/easyAlgoLanguage/easyAlgoContext',
+		easyAlgoRuntimeException : '../javascripts/easyAlgoLanguage/easyAlgoRuntimeException',
 		terminalEmulator : '../javascripts/terminalEmulator/vtortola.ng-terminal',
 		routes : '../javascripts/routes',
 		appDir : '../javascripts/',
@@ -53,25 +53,30 @@ require.config({
 			],
 			exports : 'terminalEmulator'
 		},
-		'controllers/easyCodeEditor' : {
+		'controllers/easyAlgoEditor' : {
 			deps : [
 				'codemirror/mode/htmlmixed/htmlmixed',
 				'codemirror/addon/hint/show-hint',
 				'codemirror/addon/lint/lint',
 				'codemirror/addon/fold/foldgutter',
-                'easyCodeSyntaxHighlighter',
-                'easyCodeParser',
-				'easyCodeLint',
-				'easyCodeFold',
-				'easyCodeValidator',
-				'easyCodeCloseTag',
-				'easyCodeRunner',				
+                'easyAlgoSyntaxHighlighter',
+                'easyAlgoParser',
+				'easyAlgoLint',
+				'easyAlgoFold',
+				'easyAlgoValidator',
+				'easyAlgoCloseTag',
+				'easyAlgoRunner',				
 				'services/fileSystem'
 			],
-			exports : 'controllers/easyCodeEditor'
+			exports : 'controllers/easyAlgoEditor'
 		},
 		'ng-flow/dist/ng-flow-standalone' : {
 			deps : ['angular']
+		},
+		'tc-angular-chartjs/dist/tc-angular-chartjs' : {
+			deps : [
+				'Chart.js/Chart.min'
+			]
 		},
 		app : {
 			deps: [
@@ -82,7 +87,8 @@ require.config({
 				'angularBootstrap',
 				'terminalEmulator',
 				'angular-ui-codemirror/ui-codemirror',
-				'ng-flow/dist/ng-flow-standalone'
+				'ng-flow/dist/ng-flow-standalone',
+				'tc-angular-chartjs/dist/tc-angular-chartjs'
 			],
 			exports: 'app'
 		}

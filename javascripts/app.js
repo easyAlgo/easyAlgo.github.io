@@ -1,6 +1,6 @@
 ﻿define(function (require) {
 	
-	var app = angular.module('easyCodeApp', ['ngRoute', 'ui.bootstrap', 'ui.codemirror', 'vtortola.ng-terminal', 'flow']);
+	var app = angular.module('easyAlgoApp', ['ngRoute', 'ui.bootstrap', 'ui.codemirror', 'vtortola.ng-terminal', 'flow', 'tc.chartjs']);
 	
 
 	// controller for header actions
@@ -95,7 +95,7 @@
 
 	app.init = function(){
 		// lancement de l'application
-		angular.bootstrap(document, ['easyCodeApp']);
+		angular.bootstrap(document, ['easyAlgoApp']);
 	}
 
 	return app;
