@@ -12,8 +12,12 @@ define([], function(){
 			var offsetString = undefined;
 			if (this.offset) {
 				if (cm) {
-					var objectOffset = cm.posFromIndex(this.offset);
-					offsetString = '(ligne : '+objectOffset.line+', colonne : '+objectOffset.ch+')';
+					var offset = this.offset;
+					if (offset.begin) {
+						offset = offset.begin;
+					}
+					var objectOffset = cm.posFromIndex(offset);
+					offsetString = '(ligne : '+(objectOffset.line + 1)+', colonne : '+objectOffset.ch+')';
 				} else {
 					offsetString = '(caractére : ' + this.offset+')';
 				}

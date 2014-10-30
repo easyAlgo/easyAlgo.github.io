@@ -1,314 +1,347 @@
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+  // CodeMirror, copyright (c) by Marijn Haverbeke and others
+  // Distributed under an MIT license: http://codemirror.net/LICENSE
 
-if (!Array.indexOf)
-{
-  Array.indexOf = [].indexOf ?
-      function (arr, obj, from) { return arr.indexOf(obj, from); }:
-      function (arr, obj, from) { // (for IE6)
-        var l = arr.length,
-            i = from ? parseInt( (1*from) + (from<0 ? l:0), 10) : 0;
-        i = i<0 ? 0 : i;
-        for (; i<l; i++) {
-          if (i in arr  &&  arr[i] === obj) { return i; }
-        }
-        return -1;
-      };
-}
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("codemirror/lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["codemirror/lib/codemirror", "easyAlgoConfiguration"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror, easyAlgoConfiguration) {
-"use strict";
-
-CodeMirror.defineMode("easyAlgo", function(config, parserConfig) {
-  var indentUnit = config.indentUnit,
-      statementIndentUnit = parserConfig.statementIndentUnit || indentUnit,
-      dontAlignCalls = parserConfig.dontAlignCalls,
-      keywords = parserConfig.keywords || {},
-      builtin = parserConfig.builtin || {},
-      blockKeywords = parserConfig.blockKeywords || {},
-      atoms = parserConfig.atoms || {},
-      hooks = parserConfig.hooks || {},
-      multiLineStrings = true;
-  var isOperatorChar = /[+\-*&%=<>!?|\/]/;
-
-  // create electricInput regex for end block keywork
-  var electricInputRegexString = '';
-  for (var startWord in blockKeywords) {
-	for (var word in blockKeywords[startWord]) {
-		electricInputRegexString +=  blockKeywords[startWord][word] + '|';
-	}
+  if (!Array.indexOf)
+  {
+    Array.indexOf = [].indexOf ?
+        function (arr, obj, from) { return arr.indexOf(obj, from); }:
+        function (arr, obj, from) { // (for IE6)
+          var l = arr.length,
+              i = from ? parseInt( (1*from) + (from<0 ? l:0), 10) : 0;
+          i = i<0 ? 0 : i;
+          for (; i<l; i++) {
+            if (i in arr  &&  arr[i] === obj) { return i; }
+          }
+          return -1;
+        };
   }
-  electricInputRegexString = electricInputRegexString.substring(0, electricInputRegexString.length - 1);
-  
-  var electricInputRegex = new RegExp(electricInputRegexString, 'i');
-  
-  var newStatement, endStatement;
-  
-  function tokenBase(stream, state) {
-    newStatement = false;
-	endStatement = false;
-	
-	var ch = stream.next();
-	// cas d'une chaine de caractére
-    if (ch == '"' || ch == "'") {
-      state.tokenize = tokenString(ch);
-      return state.tokenize(stream, state);
+
+  (function(mod) {
+    if (typeof exports == "object" && typeof module == "object") // CommonJS
+      mod(require("codemirror/lib/codemirror"));
+    else if (typeof define == "function" && define.amd) // AMD
+      define(["codemirror/lib/codemirror", "easyAlgoConfiguration", "easyAlgoParser"], mod);
+    else // Plain browser env
+      mod(CodeMirror);
+  })(function(CodeMirror, easyAlgoConfiguration, EasyAlgoParser) {
+  "use strict";
+
+  CodeMirror.defineMode("easyAlgo", function(config, parserConfig) {
+    var indentUnit = config.indentUnit,
+        statementIndentUnit = parserConfig.statementIndentUnit || indentUnit,
+        dontAlignCalls = parserConfig.dontAlignCalls,
+        keywords = parserConfig.keywords || {},
+        builtin = parserConfig.builtin || {},
+        blockKeywords = parserConfig.blockKeywords || {},
+        atoms = parserConfig.atoms || {},
+        hooks = parserConfig.hooks || {},
+        multiLineStrings = true;
+    var isOperatorChar = /[+\-*&%=<>!?|\/]/;
+
+    // create electricInput regex for end block keywork
+    var electricInputRegexString = '';
+    for (var startWord in blockKeywords) {
+  	for (var word in blockKeywords[startWord]) {
+  		electricInputRegexString +=  blockKeywords[startWord][word] + '|';
+  	}
     }
-	// cas d'un nombre
-    if (/\d/.test(ch)) {
-      stream.eatWhile(/[\w\.\,]/);
-      return "number";
-    }
-	
-	// cas du début d'un commentaire
-    if (ch == "/") {
-      if (stream.eat("*")) {
-        state.tokenize = tokenComment;
-        return tokenComment(stream, state);
-      }
-	  // cas d'un commentaire sur une seul ligne on va simplement à la fin de la ligne
-      if (stream.eat("/")) {
-        stream.skipToEnd();
-        return "comment";
-      }
-    }
-	
-	// cas d'un opérateur
-	if (isOperatorChar.test(ch)) {
-      stream.eatWhile(isOperatorChar);
-      return "operator";
-    }
-	
-    stream.eatWhile(/[\w\$_]/);
-    var cur = stream.current();
-	cur = cur.toUpperCase();
-    // cas d'un mot clef
-	if (keywords.propertyIsEnumerable(cur)) {
-	  if (blockKeywords.propertyIsEnumerable(cur)) {
-		newStatement = true;
-	  } 
-	  
-	  if (
-			blockKeywords.propertyIsEnumerable(state.context.blockName) 
-		 && blockKeywords[state.context.blockName].indexOf(cur) >= 0
-	  ) {
-		endStatement = true;
-      }
-	  	  
-	  return "keyword";
-    }
-	
-	// gestion des atoms du languages
-    if (atoms.propertyIsEnumerable(cur)) return "atom";
-	
-    return "variable";
-  }
-
-  function tokenString(quote) {
-    return function(stream, state) {
-      var escaped = false, next, end = false;
-      while ((next = stream.next()) != null) {
-        if (next == quote && !escaped) {end = true; break;}
-        escaped = !escaped && next == "\\";
-      }
-      if (end || !(escaped || multiLineStrings))
-        state.tokenize = null;
-      return "string";
-    };
-  }
-
-  function tokenComment(stream, state) {
-    var maybeEnd = false, ch;
-    while (ch = stream.next()) {
-      if (ch == "/" && maybeEnd) {
-        state.tokenize = null;
-        break;
-      }
-      maybeEnd = (ch == "*");
-    }
-    return "comment";
-  }
-
-  function Context(indented, column, type, align, prev, blockName, vars) {
-    this.indented = indented;
-    this.column = column;
-    this.type = type;
-    this.align = align;
-    this.prev = prev;
-	this.blockName = blockName;
-	this.vars = vars || [];
-  }
-
-  function pushContext(state, col, type, blockName) {
-    var indent = state.indented;
-	
-    if (type == "statement") {
-	  indent = ((state.context) ? state.context.indented : 0) +  indentUnit;
-	}
-	
-    return state.context = new Context(indent, col, type, null, state.context, blockName);
-  }
-  
-  function popContext(state) {
-    return state.context = state.context.prev;
-  }
-
-  // Interface
-
-  return {
-    startState: function(basecolumn) {
-      return {
-        tokenize: null,
-        context: new Context(0, 0, "top", false),
-        indented: 0,
-        startOfLine: true
-      };
-    },
-
-    token: function(stream, state) {
-      var ctx = state.context;
-      if (stream.sol()) {
-        if (ctx.align == null) ctx.align = false;
-        state.indented = stream.indentation();
-        state.startOfLine = true;
-      }
-	  
-      if (stream.eatSpace()) return null;
-	  
-  	  var style = (state.tokenize || tokenBase)(stream, state);
-       
-        ctx.align = ctx.align || true;
+    electricInputRegexString = electricInputRegexString.substring(0, electricInputRegexString.length - 1);
+    
+    var electricInputRegex = new RegExp(electricInputRegexString, 'i');
+    
+    var newStatement, endStatement;
+    
+    function tokenBase(stream, state) {
+      newStatement = false;
+  	endStatement = false;
   	
-  	  if (endStatement) {
-		popContext(state);
-  	  }
-  	  
-  	  if (newStatement) {
-		pushContext(state, stream.column(), "statement", stream.current().toUpperCase());
-  	  }
-	  
-      return style;
-    },
-
-    indent: function(state, textAfter) {
-	  var blockName = state.context.blockName ? state.context.blockName.toUpperCase() : '';
-  	  // if it's a end statement, this is reindented with -indentUnit
-  	  if (blockKeywords[blockName] && blockKeywords[blockName].indexOf(textAfter.toUpperCase()) >= 0) {
-  		state.context.indented -= indentUnit;
-  		if (state.context.indented < 0) {
-  			state.context.indented = 0;
-  		}
-  	  }
-	  
-	  return (state.context ? state.context.indented : 0);
-    },
-	  electricInput: electricInputRegex,
-    blockCommentStart: "/*",
-    blockCommentEnd: "*/",
-    lineComment: "//",
-    fold: "easyAlgo"
-  };
-});
-
-  function words(str) {
-    var obj = {}, words = str.split(" ");
-    for (var i = 0; i < words.length; ++i) obj[words[i]] = true;
-    return obj;
-  }
-
-  function def(mimes, mode) {
-    if (typeof mimes == "string") mimes = [mimes];
-    var words = [];
-    function add(obj) {
-      if (obj) for (var prop in obj) if (obj.hasOwnProperty(prop))
-        words.push(prop);
-    }
-    add(mode.keywords);
-    add(mode.builtin);
-    add(mode.atoms);
-    if (words.length) {
-      mode.helperType = mimes[0];
-      CodeMirror.registerHelper("hint", "easyAlgo", function(editor, options){
-    		var Pos = CodeMirror.Pos;
-    		var cur = editor.getCursor();
-    		var token = editor.getTokenAt(editor.getCursor());
-    		
-    		var list = [];
-    		var wordList = [];
-    		function addToList(value, isFunction) {
-    			var tokenString = token.string.trim().toUpperCase();
-    			
-    			// test if value correspond current entry
-    			if (tokenString.length > 0 && value.indexOf(tokenString) == -1) {
-    				return;
-    			}
-    			
-    			if (Array.indexOf(list, value) == -1) {
-    				wordList.push(value);
-    				list.push(
-    					{
-    						text : value,
-    						hint : function(cm, data, completion){
-    							var easyAlgo = cm.getMode({},"easyAlgo");
-    							
-    							var before = cm.getRange(Pos(cur.line, 0), Pos(cur.line, token.start));
-    							// if the word is the first of the line
-    							if (before.trim().length == 0) {
-    								token.start = easyAlgo.indent(token.state, completion.text);
-    							} else if (token.string.trim() == 0) {
-    								// if it's after an other word but no car are entred
-    								token.start += 1;
-    							}
-    													
-    							cm.replaceRange(completion.text.toLowerCase() + (isFunction ? '()' : ''), Pos(cur.line, token.start),  Pos(cur.line, token.end), "complete")
-							}
-    					}
-    				);
-    			}
-    		}
-    		
-    		// add end bloc keyword
-    		if (vblocKeyWord[token.state.context.blockName]) {
-    			for (var i in  vblocKeyWord[token.state.context.blockName]) {
-    				addToList(vblocKeyWord[token.state.context.blockName][i]);
-    			}
-    		}
-    		
-    		for (var i in words) {
-    			addToList(words[i]);
-    		}
-
-        var functions = easyAlgoConfiguration.getFunctions();
-        for (var i in functions) {
-          addToList(i.toUpperCase(), true);
+  	var ch = stream.next();
+  	// cas d'une chaine de caractére
+      if (ch == '"' || ch == "'") {
+        state.tokenize = tokenString(ch);
+        return state.tokenize(stream, state);
+      }
+  	// cas d'un nombre
+      if (/\d/.test(ch)) {
+        stream.eatWhile(/[\w\.\,]/);
+        return "number";
+      }
+  	
+  	// cas du début d'un commentaire
+      if (ch == "/") {
+        if (stream.eat("*")) {
+          state.tokenize = tokenComment;
+          return tokenComment(stream, state);
         }
-    	 
-    		return {
-    			list : list,
-    			from: Pos(cur.line, token.start),
-    			to: Pos(cur.line, token.end)				
-    		};
-	   });
+  	  // cas d'un commentaire sur une seul ligne on va simplement à la fin de la ligne
+        if (stream.eat("/")) {
+          stream.skipToEnd();
+          return "comment";
+        }
+      }
+  	
+  	// cas d'un opérateur
+  	if (isOperatorChar.test(ch)) {
+        stream.eatWhile(isOperatorChar);
+        return "operator";
+      }
+  	
+      stream.eatWhile(/[\w\$_]/);
+      var cur = stream.current();
+  	cur = cur.toUpperCase();
+      // cas d'un mot clef
+  	if (keywords.propertyIsEnumerable(cur)) {
+  	  if (blockKeywords.propertyIsEnumerable(cur)) {
+  		newStatement = true;
+  	  } 
+  	  
+  	  if (
+  			blockKeywords.propertyIsEnumerable(state.context.blockName) 
+  		 && blockKeywords[state.context.blockName].indexOf(cur) >= 0
+  	  ) {
+  		endStatement = true;
+        }
+  	  	  
+  	  return "keyword";
+      }
+  	
+  	// gestion des atoms du languages
+      if (atoms.propertyIsEnumerable(cur)) return "atom";
+  	
+      return "variable";
     }
 
-    for (var i = 0; i < mimes.length; ++i)
-      CodeMirror.defineMIME(mimes[i], mode);
-  }
+    function tokenString(quote) {
+      return function(stream, state) {
+        var escaped = false, next, end = false;
+        while ((next = stream.next()) != null) {
+          if (next == quote && !escaped) {end = true; break;}
+          escaped = !escaped && next == "\\";
+        }
+        if (end || !(escaped || multiLineStrings))
+          state.tokenize = null;
+        return "string";
+      };
+    }
 
-  var vblocKeyWord = easyAlgoConfiguration.getStartToEndBlock();
-  
-  def(["text/easyAlgo-src"], {
-    name: "easyAlgo",
-    keywords: words("LIRE ECRIRE SI SI_NON SI_NON_SI FIN_SI POUR DE A DANS PAR FIN_POUR TANT_QUE FIN_TANT_QUE DEFINIR ET OU DEFINIR_FONCTION FIN_FONCTION RETOURNER"),
-    blockKeywords: vblocKeyWord,
-    atoms: words("NOMBRE CHAINE BOOLEEN TABLEAU VRAI FAUX VIDE")
+    function tokenComment(stream, state) {
+      var maybeEnd = false, ch;
+      while (ch = stream.next()) {
+        if (ch == "/" && maybeEnd) {
+          state.tokenize = null;
+          break;
+        }
+        maybeEnd = (ch == "*");
+      }
+      return "comment";
+    }
+
+    function Context(indented, column, type, align, prev, blockName, vars) {
+      this.indented = indented;
+      this.column = column;
+      this.type = type;
+      this.align = align;
+      this.prev = prev;
+  	this.blockName = blockName;
+  	this.vars = vars || [];
+    }
+
+    function pushContext(state, col, type, blockName) {
+      var indent = state.indented;
+  	
+      if (type == "statement") {
+       // console.log('push' , state.context.indented);
+    	  indent = ((state.context) ? state.context.indented : 0) +  indentUnit;
+    	}
+  	
+      return state.context = new Context(indent, col, type, null, state.context, blockName);
+    }
+    
+    function popContext(state) {
+      return state.context = state.context.prev;
+    }
+
+    // Interface
+
+    return {
+      startState: function(basecolumn) {
+        return {
+          tokenize: null,
+          context: new Context(0, 0, "top", false),
+          indented: 0,
+          startOfLine: true
+        };
+      },
+
+      token: function(stream, state) {
+        var ctx = state.context;
+        if (stream.sol()) {
+          if (ctx.align == null) ctx.align = false;
+          state.indented = stream.indentation();
+          state.startOfLine = true;
+        }
+  	  
+        if (stream.eatSpace()) return null;
+  	  
+    	  var style = (state.tokenize || tokenBase)(stream, state);
+         
+          ctx.align = ctx.align || true;
+    	
+    	  if (endStatement) {
+         // console.log('pop',state, stream.current().toUpperCase());
+  		popContext(state);
+    	  }
+    	  
+    	  if (newStatement) {
+          //console.log('push',state, stream.current().toUpperCase());
+  		pushContext(state, stream.column(), "statement", stream.current().toUpperCase());
+    	  }
+  	  
+        return style;
+      },
+
+      indent: function(state, textAfter) {
+        var blockName = state.context.blockName ? state.context.blockName.toUpperCase() : '';
+    	  // if it's a end statement, this is reindented with -indentUnit
+    	  var indented = state.context.indented;
+        var indexOf = textAfter.indexOf(' ');
+        if (indexOf == -1) {
+          indexOf =  textAfter.length;
+        }
+        var firstWord = textAfter.substring(0, indexOf);
+        if (blockKeywords[blockName] && blockKeywords[blockName].indexOf(firstWord.toUpperCase()) >= 0) {
+      		indented -= indentUnit;
+      		if (indented < 0) {
+      			indented = 0;
+      		}
+    	  }
+  	  
+  	  return indented || 0;
+      },
+  	  electricInput: electricInputRegex,
+      blockCommentStart: "/*",
+      blockCommentEnd: "*/",
+      lineComment: "//",
+      fold: "easyAlgo"
+    };
   });
-  
-});
+
+    function words(str) {
+      var obj = {}, words = str.split(" ");
+      for (var i = 0; i < words.length; ++i) obj[words[i]] = true;
+      return obj;
+    }
+
+    function def(mimes, mode) {
+      if (typeof mimes == "string") mimes = [mimes];
+      var words = [];
+      function add(obj) {
+        if (obj) for (var prop in obj) if (obj.hasOwnProperty(prop))
+          words.push(prop);
+      }
+      add(mode.keywords);
+      add(mode.builtin);
+      add(mode.atoms);
+      if (words.length) {
+        mode.helperType = mimes[0];
+        var lastParsedValue = '';
+        var lastParsedContext = undefined;
+
+        CodeMirror.registerHelper("hint", "easyAlgo", function(editor, options){
+      		var Pos = CodeMirror.Pos;
+      		var cur = editor.getCursor();
+      		var token = editor.getTokenAt(editor.getCursor());
+      		
+      		var list = [];
+      		var wordList = [];
+      		function addToList(value, isFunction) {
+      			var tokenString = token.string.trim().toUpperCase();
+      			
+      			// test if value correspond current entry
+      			if (tokenString.length > 0 && value.indexOf(tokenString) == -1) {
+      				return;
+      			}
+      			
+      			if (Array.indexOf(list, value) == -1) {
+      				wordList.push(value);
+      				list.push(
+      					{
+      						text : value,
+      						hint : function(cm, data, completion){
+      							var easyAlgo = cm.getMode({},"easyAlgo");
+      							
+      							var before = cm.getRange(Pos(cur.line, 0), Pos(cur.line, token.start));
+      							// if the word is the first of the line
+      							if (before.trim().length == 0) {
+      								token.start = easyAlgo.indent(token.state, completion.text);
+      							} else if (token.string.trim() == 0) {
+      								// if it's after an other word but no car are entred
+      								token.start += 1;
+      							}
+      													
+      							cm.replaceRange(completion.text.toLowerCase() + (isFunction ? '()' : ''), Pos(cur.line, token.start),  Pos(cur.line, token.end), "complete")
+  							}
+      					}
+      				);
+      			}
+      		}
+      		
+      		// add end bloc keyword
+      		if (vblocKeyWord[token.state.context.blockName]) {
+      			for (var i in  vblocKeyWord[token.state.context.blockName]) {
+      				addToList(vblocKeyWord[token.state.context.blockName][i]);
+      			}
+      		}
+      		
+      		for (var i in words) {
+      			addToList(words[i]);
+      		}
+
+          var functions = easyAlgoConfiguration.getFunctions();
+          for (var i in functions) {
+            addToList(i.toUpperCase(), true);
+          }
+
+          // add parser context var and function
+          var parser = new EasyAlgoParser();
+        	if (lastParsedValue != editor.getValue()) {
+            var parsed = parser.parse(editor.getValue());
+            // get var by context
+            var pos = editor.indexFromPos(cur);
+            lastParsedValue = editor.getValue();
+            lastParsedContext = parsed.context;
+          }
+          
+          var context = lastParsedContext.getContextFor(pos);          
+          var vars = context.getAccessibleVars();
+          for (var i in vars) {
+            addToList(i);
+          }
+          var accessibleFunctions = context.getAccessibleFunctions();
+          
+          for (var i in accessibleFunctions) {
+            addToList(i, true);
+          }
+
+      		return {
+      			list : list,
+      			from: Pos(cur.line, token.start),
+      			to: Pos(cur.line, token.end)				
+      		};
+  	   });
+      }
+
+      for (var i = 0; i < mimes.length; ++i)
+        CodeMirror.defineMIME(mimes[i], mode);
+    }
+
+    var vblocKeyWord = easyAlgoConfiguration.getStartToEndBlock();
+    
+    def(["text/easyAlgo-src"], {
+      name: "easyAlgo",
+      keywords: words("LIRE ECRIRE SI SI_NON SI_NON_SI FIN_SI POUR DE A DANS PAR FIN_POUR TANT_QUE FIN_TANT_QUE DEFINIR ET OU DEFINIR_FONCTION FIN_FONCTION RETOURNER"),
+      blockKeywords: vblocKeyWord,
+      atoms: words("NOMBRE CHAINE BOOLEEN TABLEAU VRAI FAUX VIDE")
+    });
+    
+  });

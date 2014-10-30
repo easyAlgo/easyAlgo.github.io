@@ -120,6 +120,10 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 		'functionAlreadyDefined' : {
 			message : 'La fonction {0} est déjà définie',
 			severity : 'warning'
+		},
+		'functionNotDefined' : {
+			message : 'La fonction {0} n\'est pas définie',
+			severity : 'warning'
 		}
  	};
 	
@@ -451,7 +455,7 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 					
 					// is a end block stop immediatly to parse
 					if (typeof line == "string" && line.indexOf(this.END_OF_BLOCK) === 0) {
-						return {endInstruction : line.slice(this.END_OF_BLOCK.length + 1, line.length), result : parseResult, errors : this.errors, context : this.context};
+						return {endInstruction : line.slice(this.END_OF_BLOCK.length + 1, line.length), result : parseResult, errors : this.computeErrors(), context : this.context};
 					} else {
 						this.checkEndOfLine();
 						if (line != undefined) {
@@ -479,7 +483,31 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 				throw new ParseException('blockNotEnded', [endBlock], startParsing, this.stream.pos);
 			}
 			
-			return {errors : this.errors, result : parseResult, context : this.context};			
+			return {errors : this.computeErrors(), result : parseResult, context : this.context};			
+		},
+		computeErrors : function(){
+			var errors = this.errors;
+			if (this.maybeErrors) {
+				for (var i in this.maybeErrors) {
+					var error = this.maybeErrors[i];
+					var isRealyError = false;
+					// if it's a variable not defined, if var is finaly defined don't add error
+					if (error.msg == 'variableNotDefined') {
+						if (!this.context.isset(error.parameters[0], false)) {
+							isRealyError = true;
+						}
+					} else if (error.msg == 'functionNotDefined') {
+						if (!this.context.issetFunction(error.parameters[0], false)) {
+							isRealyError = true;
+						}
+					}
+
+					if (isRealyError) {
+						errors.push(error);
+					}
+				}
+			}
+			return errors;
 		},
 		/**
 		 * parse a line code, all line type can be parse affectation, write, etc.
@@ -600,6 +628,8 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 		},
 		/**
 		 * parse a sub block used for if while for
+		 *
+		 * if second parameter is set we are in function
 		 */
 		parseChild : function(endBlock, context) {
 			var parser = new Parser(this.languageRunnerFactory, context || this.context);
@@ -613,8 +643,14 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 			// body.context is a child of context parameter
 			body.context.setRange(from, to);
 			
-			if (body.errors && body.errors.length > 0) {				
-				this.errors = this.errors.concat(body.errors);
+			if (body.errors && body.errors.length > 0) {
+				if (context) {
+					// maybe error because variable can be define after function definition
+					this.maybeErrors = this.maybeErrors || [];
+					this.maybeErrors = this.maybeErrors.concat(body.errors);					
+				} else {
+					this.errors = this.errors.concat(body.errors);
+				}			
 			}
 			return body;
 		},
@@ -1019,7 +1055,7 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 			} else {
 				this.stream.backUp(1);
 				// it's a varName
-				if (isNaN(curCh)) {
+				if (isNaN(curCh) && curCh != '-') {
 					var varname = this.parseVarname();		
 					// it'a a boolean value
 					if (varname in this.booleanName) {
@@ -1034,8 +1070,9 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 					}
 					
 					return ret;
-				} else if (this.numberRegex.test(curCh)){
-					return this.parseNumber();
+				} else if (this.numberRegex.test(curCh) || curCh == '-'){
+					var number = this.parseNumber();
+					return number;
 				}
 			}
 			
@@ -1069,7 +1106,9 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 		 * parse a number it can be 1 1.0 1,01
 		 */
 		parseNumber : function(){
+			var negative = this.stream.eat('-') ? -1 : 1;
 			var start = this.stream.pos;
+			
 			// eat number
 			this.stream.eatWhile(this.numberRegex);
 			var integer = this.stream.textBetween(start, this.stream.pos);
@@ -1078,10 +1117,10 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 				var start = this.stream.pos;
 				this.stream.eatWhile(this.numberRegex);
 				var decimal = this.stream.textBetween(start, this.stream.pos);
-				return parseFloat(integer + '.' + decimal);
+				return negative * parseFloat(integer + '.' + decimal);
 			}
 			
-			return parseInt(integer, 10);
+			return negative * parseInt(integer, 10);
 		},
 		/**
 		 * parse a var :
@@ -1125,6 +1164,9 @@ define(['easyAlgoConfiguration', 'codemirror/lib/codemirror', 'easyAlgoContext']
 			if (!isFunction) {
 				return this.languageRunnerFactory.createVar(varname, indexs, undefined, this.languageRunnerFactory.createOffset(beforeEatSpace - varname.length , beforeEatSpace));
 			} else {
+				if (!this.context.issetFunction(varname, false)) {
+					this.errors.push(new ParseException('functionNotDefined', [varname], beforeEatSpace - varname.length, beforeEatSpace));
+				}
 				return this.languageRunnerFactory.createFunctionCall(varname, indexs, params, current);
 			}			
 		},

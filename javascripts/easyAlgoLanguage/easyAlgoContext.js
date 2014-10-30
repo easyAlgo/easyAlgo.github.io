@@ -57,8 +57,10 @@ define(['easyAlgoRuntimeException', 'easyAlgoConfiguration'], function(RuntimeEx
 			return name;
 		},
 		issetFunction : function(functionName, exceptionMode, offset) {
-			var isset = functionName in FUNCTIONS 
-				|| functionName.toUpperCase() in this.functions 
+			var upperFunction = functionName.toLowerCase();
+			
+			var isset = upperFunction in FUNCTIONS 
+				|| upperFunction in this.functions 
 				|| this.formatFunctionName(functionName) in window 
 				|| (this.getParent() && this.getParent().issetFunction(functionName));
 			
@@ -78,12 +80,13 @@ define(['easyAlgoRuntimeException', 'easyAlgoConfiguration'], function(RuntimeEx
 			return undefined;
 		},
 		getFunction : function(functionName) {
-			if (functionName in FUNCTIONS) {
+			var upperFunction = functionName.toLowerCase();
+			if (upperFunction in FUNCTIONS) {
 				return FUNCTIONS[functionName];
 			} 
 			
-			if (functionName.toUpperCase() in this.functions) {
-				return this.functions[functionName.toUpperCase()];
+			if (upperFunction in this.functions) {
+				return this.functions[functionName];
 			}
 			
 			var formatFunction = this.formatFunctionName(functionName);
@@ -105,7 +108,7 @@ define(['easyAlgoRuntimeException', 'easyAlgoConfiguration'], function(RuntimeEx
 		setValue : function(varName, value, indexs) {
 			// TODO add type check
 			if (indexs != undefined) {					
-				if (this.getType(varName) == 'array') {
+				if (this.getType(varName) == 'array' || this.getType(varName) == 'string') {
 					var varValue = this.getVar(varName);
 					
 					if (varValue.value == undefined) {
@@ -192,7 +195,7 @@ define(['easyAlgoRuntimeException', 'easyAlgoConfiguration'], function(RuntimeEx
 			return this;
 		},
 		defineFunction : function(functionName, functionParameters, body) {
-			this.functions[functionName] = {parameters : functionParameters, body : body};
+			this.functions[functionName.toLowerCase()] = {parameters : functionParameters, body : body};
 		}
 	};
 		

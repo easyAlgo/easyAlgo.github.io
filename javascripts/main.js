@@ -1,6 +1,6 @@
 require.config({
 	baseUrl : '../bower_components',
-    urlArgs: "bust=" + (new Date()).getTime(),
+    //urlArgs: "bust=" + (new Date()).getTime(),
 	paths : {
 		// configuration base dir
 		services : '../javascripts/services',
@@ -9,8 +9,8 @@ require.config({
 		
 		// module shortcut
 		app : '../javascripts/app',
-		angular : 'angular/angular.min',
-		angularBootstrap : 'angular-bootstrap/ui-bootstrap-tpls.min',
+		angular : 'angular/angular',
+		angularBootstrap : 'angular-bootstrap/ui-bootstrap-tpls',
 		angularRoute : 'angular-route/angular-route.min',
 		easyAlgoParser : '../javascripts/easyAlgoLanguage/easyAlgoParser',
 		easyAlgoRunner : '../javascripts/easyAlgoLanguage/easyAlgoRunner',

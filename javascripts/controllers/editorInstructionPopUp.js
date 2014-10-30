@@ -33,6 +33,15 @@ define(['app', 'easyAlgoConfiguration', 'easyAlgoParser', 'controllers/popUp'], 
 		},
 		'for' : function(values) {
 			return !this.isEmpty(values.varname) && !this.isEmpty(values.start) && !this.isEmpty(values.end);		
+		},
+		'functionSimple' : function(values) {
+			return !this.isEmpty(values.name) && !this.isEmpty(values.expression);
+		},
+		'functionConditional' : function(values) {
+			return !this.isEmpty(values.name)  && !this.isEmpty(values.paramType) && !this.isEmpty(values.elseReturn);
+		},
+		'function' : function(values) {
+			return !this.isEmpty(values.name);
 		}
 	};
 	
@@ -184,6 +193,50 @@ define(['app', 'easyAlgoConfiguration', 'easyAlgoParser', 'controllers/popUp'], 
 			code += '\nfin_pour';
 
 			return {overrideSelection : true, code : code};
+		},
+		'functionSimple' : function(context, values) {
+			var code = '// ' + values.name + '(x) = ' + values.expression;
+			
+			code += '\ndefinir_fonction ' + values.name + '(x : nombre)\n';
+			code += '\tretourner ' + values.expression;
+			code += '\nfin_fonction';
+
+			return {overrideSelection : false, code : code, addAtStart : true};
+		},
+		'functionConditional' : function(context, values) {
+			var code = 'definir_fonction ' + values.name + '(x : '+values.paramType+')\n';
+			
+			if (values.arrayValues) {
+				for (var i in values.arrayValues) {
+					var condition = values.arrayValues[i];
+					code += '\tsi' + (i == 0 ? ' ' : '_non_si ') + condition.condition + '\n';
+					code += '\t\tretourner '+ condition.expression + '\n';
+				}				
+				code += '\tfin_si\n';
+			}
+
+			code += '\tretourner ' + values.elseReturn;
+			code += '\nfin_fonction';
+
+			return {overrideSelection : false, code : code, addAtStart : true};
+		},
+		'function' : function(context, values) {
+			var code = 'definir_fonction ' + values.name + '(';
+			
+			if (values.arrayValues) {
+				for (var i in values.arrayValues) {
+					var parameter = values.arrayValues[i];
+					code += parameter.name + ' : ' + parameter.type + '; ';
+				}
+				code = code.substring(0, code.length - 2);
+			}
+
+			code += ')\n';
+			code += '\t// code de la fonction\n';
+			code += '\tretourner ""//compléter la fonction avec la valeur à retourner';
+			code += '\nfin_fonction';
+
+			return {overrideSelection : false, code : code, addAtStart : true};
 		}
 	};
 	
@@ -206,15 +259,20 @@ define(['app', 'easyAlgoConfiguration', 'easyAlgoParser', 'controllers/popUp'], 
 				'position' : 2
 			}, 
 			'Structure itérative' : {
-				'Execution tant que vrai' : {id:'while', 'title' : 'Boucle tant que'},
-				'Parcour entre deux nombres' : {id:'for', 'title' : 'Boucle pour'},
-				'Parcour d\'un tableau' : {id:'foreach', 'title' : 'Boucle pour chaque'},
+				'Execution tant que vrai' : {id:'while', title : 'Boucle tant que'},
+				'Parcour entre deux nombres' : {id:'for', title : 'Boucle pour'},
+				'Parcour d\'un tableau' : {id:'foreach', title : 'Boucle pour chaque'},
 				'position' : 3
+			},
+			'Fonctions' : {
+				'Fonction simple' : {id : 'functionSimple', title : 'Fonction simple'},
+				'Fonction conditionnel' : {id : 'functionConditional', title : 'Fonction conditionnel'},
+				'Fonction' : {id : 'function', title : 'Fonction'}
 			},
 			'Aide' : {
 				'Liste de fonctions' : {type : 'help', id : 'functions', title : 'Fonctions'},
 				'Liste des variables' : {type : 'help', id : 'variables', title : 'Variables'},
-				'position' : 4
+				'position' : 5
 			}
 		};
 
@@ -303,11 +361,6 @@ define(['app', 'easyAlgoConfiguration', 'easyAlgoParser', 'controllers/popUp'], 
 			$timeout(function(){				
 				var selection = codeMirror.listSelections()[0];
 				var selected = $scope.selected || {};
-		     	// new line of code
-		     	var newLine = undefined;
-		     	// must remove the selected code
-		     	var overrideSelection = false;	
-
 		     	// check if start == end
 		     	var selectedCode = undefined;
 		     	if(!(selection.head.line == selection.anchor.line && selection.head.ch == selection.anchor.ch)) {
@@ -318,11 +371,23 @@ define(['app', 'easyAlgoConfiguration', 'easyAlgoParser', 'controllers/popUp'], 
 				}
 
 	     		var value  = codeConstructor[selected.id](context, selected, selectedCode);
-				newLine = value.code;
-				overrideSelection = value.overrideSelection || false;		     	
+				// new line of code
+				var newLine = value.code;
+				// must remove the selected code
+		     	var overrideSelection = value.overrideSelection || false;		     	
+				// add the code at top of code
+				var addAtStart = value.addAtStart;
 
-		     	var start = overrideSelection && selectedCode ? startSelected : selection.head; 
-		     	var end = overrideSelection && selectedCode ? endSelected : selection.head;
+		     	var start = selection.head;
+		     	var end = selection.head;
+
+		     	if (overrideSelection && selectedCode) {
+		     		start = startSelected;
+		     		end = endSelected;
+		     	} else if (addAtStart) {
+					start = {ch : 0, line : 0};
+		     		end = start;
+		     	}
 
 				// indent correctly the current line
 				var token = codeMirror.getTokenAt(start);
@@ -330,10 +395,8 @@ define(['app', 'easyAlgoConfiguration', 'easyAlgoParser', 'controllers/popUp'], 
 
 				// tabulate 
 				var stringTabulate = tabulate(indentNumber);	
-				console.log(newLine);
 				newLine = stringTabulate + newLine;
-				newLine = newLine.replace(/\n/g, '\n' + stringTabulate);				
-				console.log(newLine);
+				newLine = newLine.replace(/\n/g, '\n' + stringTabulate);
 
 		     	// already add a new line end add the code at the end of line
 		     	var beforeCursor = codeMirror.getRange(CodeMirror.Pos(start.line, 0), start);

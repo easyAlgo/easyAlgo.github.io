@@ -36,49 +36,101 @@
 		'abs' : Math.abs,
 		'logarithme' : Math.log,
 		'radians' : function(degrees) {
-		  return degrees * Math.PI / 180;
+		  	return degrees * Math.PI / 180;
 		},
  		'degre' : function(radians) {
-		  return radians * 180 / Math.PI;
-		}
+		  	return radians * 180 / Math.PI;
+		},
+		'non' : function(boolean) {
+			return !boolean;
+		},
+		'to_ascii' : function(car) {
+			return car.charCodeAt(0);
+		},
+		'to_char' : function(ascii) {
+		  return String.fromCharCode(ascii);
+		},
+		'rationaliser' : function(x) {
+			var negative = x < 0 ? '-' : '';
+			x = Math.abs(x);
+			var tolerance = 1.0E-6;
+			var h1=1; var h2=0;
+			var k1=0; var k2=1;
+			var b = x;
+			do {
+				var a = Math.floor(b);
+				var aux = h1; h1 = a*h1+h2; h2 = aux;
+				aux = k1; k1 = a*k1+k2; k2 = aux;
+				b = 1/(b-a);
+			} while (Math.abs(x-h1/k1) > x*tolerance);
+			
+			if (k1 == 1) {
+				return negative + h1;
+			}
+			// over than 100 fraction have no sens
+			if (Math.abs(h1) == Infinity || Math.abs(k1) == Infinity) {
+				return negative + x;
+			}
+			
+			return negative + h1+ "/"+ k1+ ((k1 > 100) ? ' (' + negative + x + ')' : '') ;
+		},
+		'couper' : function(string, separator) {
+			return string.split(separator);
+		},
+		'joindre' : function(array, glue) {
+			return array.join(glue || ' ');
+		},
+		'sous_chaine' : function(string, start, end) {
+			return string.substring(start, end);
+		},
+		'index' : function(string, search, start) {
+			return string.indexOf(search, start);
+		}		
 	};
 	
 	config.functionsDescription = {
 		'aleatoire' : 'Permet de retourner un nombre au hasard entre un minimum et un maximum. par exemple aleatoir(0; 10) retourne un nombre entre 0 et 10.',
-		'taille' : 'Permet de connaitre la taille d\'un tableau',
+		'taille' : 'Permet de connaitre la taille d\'un tableau ou d\'une chaine',
 		'en_entier' : 'Permet de convertir une chaine de caractére en un nombre',
 		'racine_carree' : 'Permet de calculer la racine carée d\'un nombre',
 		'arondi_inferieur' : 'Permet d\'arondir un nombre à l\'entier inférieur le plus proche',
 		'arondi_superieur' : 'Permet d\'arondir un nombre à l\'entier superieur le plus proche',
 		'arondi' : 'Permet de calculer l\'arondi le plus proche du nombre',
 		'puissance' : 'Permet de mettre un nombre à la puissance x puissance(nombre; x). Exemple : 4*4*4 = puissance(4; 3)',
-		'cosinus' : 'Permet de calculer le cosinus du paramétre',
-		'sinus' : 'Permet de calculer le sinus du paramétre',
-		'tangente' : 'Permet de calculer la tangente du paramétre. Le paramétre doit être en radians',
-		'exponentielle' : 'Permet de calculer l\'exponentielle du nombre passé en paramétre',
-		'arctangente' : 'Permet de calculer l\'arctangente du paramétre',
-		'arcsinus' : 'Permet de calculer l\'arcsinus du paramétre',
-		'arccosinus' : 'Permet de calculer l\'arccosinus du paramétre',
-		'abs' : 'Retourne la valeur absolue du paramétre',
-		'radians' : 'Converti le paramétre de degré en radian',
-		'degre' : 'Converti le paramétre de radian en degré',
-		'logarithme' : 'Calcul logarithme népérien du paramétre'
+		'cosinus' : 'Permet de calculer le cosinus du paramètre',
+		'sinus' : 'Permet de calculer le sinus du paramètre',
+		'tangente' : 'Permet de calculer la tangente du paramètre. Le paramètre doit être en radians',
+		'exponentielle' : 'Permet de calculer l\'exponentielle du nombre passé en paramètre',
+		'arctangente' : 'Permet de calculer l\'arctangente du paramètre',
+		'arcsinus' : 'Permet de calculer l\'arcsinus du paramètre',
+		'arccosinus' : 'Permet de calculer l\'arccosinus du paramètre',
+		'abs' : 'Retourne la valeur absolue du paramètre',
+		'radians' : 'Converti le paramètre de degré en radian',
+		'degre' : 'Converti le paramètre de radian en degré',
+		'logarithme' : 'Calcul logarithme népérien du paramètre',
+		'to_ascii' : 'Retourne le nombre ascii associé au caractére en paramètre ',
+		'to_char' : 'Retourne le caractére associé au code ascii en paramètre',
+		'rationaliser' : 'Retourne une chaine qui représente le nombre sous forme de fraction. 0.333333333 retourne 1/3',
+		'couper' : 'Retourner un tableau qui est la chaine découpée en fonction d\'un separateur. Exemple couper(\'Bonjour le monde\'; \' \') = [\'Bonjour\';\'Le\';\'Monde\']',
+		'sous_chaine' : 'Retourne une sous chaine de la chaine en paramétre. Prend en paramétre la chaine, le debut et la fin de la sous chaine souhaitée. Exemple sous_chaine("Bonjour"; 0; 2) = "Bo", sous_chaine("Bonjour"; 1) = "onjour".',
+		'index' : 'Retourne la position de la chaine cherchée dans la chaine. index("Bonjour"; "o") = 1, index("Bonjour"; "o"; 2) = 4',
+		'joindre' : 'Join les elements d\'un tableau et retourne une chaine de caractére. Exemple : joindre(["bla"; "bla"], " ") = "bla bla"'
 	};
 
 	// list of javascript function to ignore
 	config.skipedFunction = ['eval'];
 	
 	// block used for syntaxe higlight
+	// si non 
 	config.blocNames = {
 		'SI'  : ['FIN_SI', 'SI_NON', 'SI_NON_SI'],
 		'TANT_QUE' : ['FIN_TANT_QUE'],
 		'POUR' : ['FIN_POUR'],
-		'SI_NON_SI' : ['FIN_SI', 'SI_NON'],
 		'SI_NON' : ['FIN_SI'],
-		'DEFINIR_FONCTION' : ['FIN_FONCTION']
+		'DEFINIR_FONCTION' : ['FIN_FONCTION'],
+		'SI_NON_SI' : ['FIN_SI', 'SI_NON', 'SI_NON_SI'],
     };
-	
-	
+
 	config.autoCloseTag = {
 		'SI ' : 'FIN_SI', // if have a space because SI have a SI_NON two have I car
 		'POUR' : 'FIN_POUR',

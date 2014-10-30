@@ -154,7 +154,7 @@
           for (var i = 0; i < nbIndent; i++) {
             appendString += '\t'
           }
-          cm.replaceSelection(key.trim() + ' \n' + appendString + codes[startTag]);
+          cm.replaceSelection(key.trim() + ' \n' + appendString + codes[startTag].toLowerCase());
           cm.setCursor({line: range.head.line , ch : range.head.ch + 2 });            
           
         }

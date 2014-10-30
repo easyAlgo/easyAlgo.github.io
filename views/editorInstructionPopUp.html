@@ -410,6 +410,118 @@
 				</div>
 			</div>
 
+			<!-- fonction simple avec un paramètre et un exepression -->
+			<div ng-if="selected.id == 'functionSimple'">
+				<div class="alert alert-info" role="alert"> 
+					Fonction simple avec un seul paramètre qui est un nombre, <b> le nom du paramètre est  x </b>. Par exemple f(x) = a * x + b. Ce type de fonction peut servir pour afficher un graphe.
+				</div>
+				
+				<div ng-include src="'functionName.html'"></div>
+				
+				<div class="form-group" ng-class="{'has-error has-feedback' : isValidated && insForm.expression.$error.required}">
+					<label for="expression"  class="col-sm-4 control-label"> Expression : </label>
+					<div class="col-sm-7">
+						<input type="text" id="expression" ng-model="selected.expression" name="expression" class="form-control" required/>
+						<span class="error help-block" ng-show="isValidated && insForm.expression.$error.required">Obligatoire</span>
+						<div class="help-block">
+							L'expression représente le résultat de la fonction. Par exemple pour f(x) = 2x+3, l'expression sera 2 * x + 3.
+						</div>
+					</div>
+				</div>
+				
+			</div>
+			
+			<!-- fonction suite de if -->
+			<div ng-if="selected.id == 'functionConditional'">
+				<div class="alert alert-info" role="alert"> 
+					Fonction qui prend un paramètre d'un type au choix, <b> le nom du paramètre est  x </b>. Cette fonction effectue une opération différente en fonction du paramètre par exemple.
+					f(x) = Si x == 1 retourner 1 si x == 2 retourner 2 si_non retourner f(x - 1) + f( x - 2)
+				</div>
+
+				<div ng-include src="'functionName.html'"></div>
+
+				<div class="form-group" ng-class="{'has-error has-feedback' : isValidated && insForm.paramType.$error.required}">
+					<label for="paramType"  class="col-sm-4 control-label"> Type du paramètre </label>
+					<div class="col-sm-7">
+						<select name="paramType" class="form-control" id="paramType" ng-model="selected.paramType" required>
+							<option ng-repeat="(type, _) in configuration.varTypes | orderBy:type:reverse" value="{{type}}">{{type}}</option>
+						</select>
+						<span class="error help-block" ng-show="isValidated && insForm.paramType.$error.required">Obligatoire</span>
+					</div>
+				</div>
+
+				<div class="form-group" ng-class="{'has-error has-feedback' : isValidated && insForm.elseReturn.$error.required}">
+					<label for="elseReturn"  class="col-sm-4 control-label"> Si non </label>
+					<div class="col-sm-7">
+						<input type="text" id="elseReturn" name="elseReturn" ng-model="selected.elseReturn" class="form-control" required/>
+						<span class="error help-block" ng-show="isValidated && insForm.elseReturn.$error.required">Obligatoire</span>
+						<span class="help-block"> Cette expression est retournée si aucune condition n'est respéctée.</span>
+					</div>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-sm-4 control-label"> Suite des conditions </label>
+				</div>
+
+				<div ng-repeat="arrayValue in selected.arrayValues track by $index" class="row">
+					<div class="col-sm-4">
+						<input type="text" ng-model="arrayValue.condition" class="form-control"/>
+					</div>
+					<div class="col-sm-6">
+						<input type="text" ng-model="arrayValue.expression" class="form-control"/>
+					</div>
+					<span ng-click="removeArray($index)" class="glyphicon glyphicon-minus-sign col-sm-2 cursor" style="margin-top : 5px" ></span>
+				</div>
+
+				<div class="row">
+					<div class="col-sm-4">
+						<input placeholder="Condition" type="text" ng-model="selected.arrayCurrentValue.condition" class="form-control"/> 
+					</div>
+					<div class="col-sm-6">
+						<input placeholder="expression à retourner" type="text" ng-model="selected.arrayCurrentValue.expression" class="form-control"/> 
+					</div>
+					<span ng-click="addArrayValue()" class="glyphicon glyphicon-plus-sign col-sm-2 cursor" style="margin-top : 5px" ></span>							
+				</div>
+
+			</div>
+			
+			<!-- fonction  -->
+			<div ng-if="selected.id == 'function'">
+				<div class="alert alert-info" role="alert"> 
+					Ce type de fonction prend autant de paramètre que vous voulez, mais le contenu de la fonction est à écrire par vous même.
+					Attention une fonction doit être terminée par l'instruction <b>RETOURNER</b> qui indique quel valeur est retournée par la fonction.
+				</div>
+
+				<div ng-include src="'functionName.html'"></div>
+
+				<div class="row form-group">
+					<label class="col-sm-4 control-label"> Paramètres </label>
+				</div>
+
+				<div ng-repeat="arrayValue in selected.arrayValues track by $index" class="row">
+					<div class="col-sm-4">
+						<input type="text" ng-model="arrayValue.name" class="form-control"/>
+					</div>
+					<div class="col-sm-6">
+						<select class="form-control" ng-model="arrayValue.type" required>
+							<option ng-repeat="(type, _) in configuration.varTypes | orderBy:type:reverse" value="{{type}}" ng-selected="type == arrayValue.type">{{type}}</option>
+						</select>
+					</div>
+					<span ng-click="removeArray($index)" class="glyphicon glyphicon-minus-sign col-sm-2 cursor" style="margin-top : 5px" ></span>
+				</div>
+
+				<div class="row">
+					<div class="col-sm-4">
+						<input placeholder="nom du paramètre" type="text" ng-model="selected.arrayCurrentValue.name" class="form-control"/> 
+					</div>
+					<div class="col-sm-6">
+						<select class="form-control" ng-model="selected.arrayCurrentValue.type" required>
+							<option ng-repeat="(type, _) in configuration.varTypes | orderBy:type:reverse" value="{{type}}">{{type}}</option>
+						</select>
+					</div>
+					<span ng-click="addArrayValue()" class="glyphicon glyphicon-plus-sign col-sm-2 cursor" style="margin-top : 5px" ></span>							
+				</div>
+			</div>
 		</form>
 	</div>
 
@@ -420,3 +532,22 @@
 	<button class="btn btn-success" ng-click="validateForm() && close(false)"> Ok </button>
 	<button class="btn btn-warning" ng-click="close(true)"> Quitter </button>
 </div>
+
+
+
+<!---------------------------------------
+	---- TEMPLATES ----------------------
+	-------------------------------------->
+
+<script type="text/ng-template" id="functionName.html">
+	<div class="form-group" ng-class="{'has-error has-feedback' : isValidated && insForm.name.$error.required}">
+		<label for="name"  class="col-sm-4 control-label"> Nom de la fonction : </label>
+		<div class="col-sm-7">
+			<input type="text" id="name" ng-model="selected.name" name="name" class="form-control" required/>
+			<span class="error help-block" ng-show="isValidated && insForm.name.$error.required">Obligatoire</span>
+			<div class="help-block">
+				Le nom de la fonction. Par exemple pour f(x) = 2x+3 le nom de la fonction est f
+			</div>
+		</div>
+	</div>
+</script>

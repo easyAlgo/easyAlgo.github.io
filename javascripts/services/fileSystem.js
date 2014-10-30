@@ -123,15 +123,18 @@ define(['ffFileSystem'], function()
 				function(error) {console.log(error)}
 			);
 		},
-		removeFile : function(filePath) {
+		removeFile : function(filePath, whenDo) {
 			this.fs.root.getFile(
 				filePath,
 				{},
 				function(fileEntry) {
-					fileEntry.remove(function(){});
+					fileEntry.remove(function(){
+						whenDo && whenDo();
+					});
 				},
 				function(error) {
-					console.log(error);
+					console.log(error, filePath);
+					whenDo && whenDo();
 				}
 			);
 		}

@@ -1,4 +1,4 @@
-define(['app'], function(app){
+define(['app', 'services/templatePreloader'], function(app){
 
 	app.controller('popUpController',  function($scope, $modalInstance, title, message, buttons){
 		$scope.title = title || 'Alerte';
@@ -24,7 +24,9 @@ define(['app'], function(app){
 			$scope.close(result === false);
 		};
 	})
-	.factory('popUpManager', ['$modal', function($modal){
+	.factory('popUpManager', ['$modal', 'templatePreloader', function($modal, templatePreloader){
+		templatePreloader('popUp.html');
+
 		return service = {
 			templateUrl : 'popUp.html',
 			controller : 'popUpController',

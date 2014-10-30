@@ -2090,6 +2090,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
           var $modal = {};
 
           function getTemplatePromise(options) {
+            console.log('getTemplate', $templateCache.get('editorInstructionPopUp.html'));
             return options.template ? $q.when(options.template) :
               $http.get(angular.isFunction(options.templateUrl) ? (options.templateUrl)() : options.templateUrl,
                 {cache: $templateCache}).then(function (result) {

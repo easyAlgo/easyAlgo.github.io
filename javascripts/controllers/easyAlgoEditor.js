@@ -1,4 +1,12 @@
-define(['app', 'easyAlgoParser', 'services/fileSystem', 'controllers/popUp', 'controllers/editorInstructionPopUp'], function(app, Parser, fs)
+define(
+[
+	'app', 
+	'easyAlgoParser',
+	'services/fileSystem',
+	'services/templatePreloader',
+	'controllers/popUp',
+	'controllers/editorInstructionPopUp'
+], function(app, Parser, fs)
 {
 	// default editor configuration
 	var EDITOR_OPTIONS = {
@@ -9,8 +17,7 @@ define(['app', 'easyAlgoParser', 'services/fileSystem', 'controllers/popUp', 'co
 		extraKeys: {"Ctrl-Space": "autocomplete"},
 		lint : {async : true} ,
 		foldGutter: true,
-		autoCloseBrackets : true,
-		dragDrop : false
+		autoCloseBrackets : true
 	};
 		
 	// object used for write on the console
@@ -86,7 +93,7 @@ define(['app', 'easyAlgoParser', 'services/fileSystem', 'controllers/popUp', 'co
 		return string.replace(/[^a-z0-9\(\)\-]/gi, '_').toLowerCase();
 	}
 		
-    app.controller('easyAlgoEditor', function($scope, popUpManager, $modal, $timeout){
+    app.controller('easyAlgoEditor', function($scope, $modal, $timeout, $injector, templatePreloader, popUpManager){
 			
 		terminalWritter.init($scope, $timeout);
 		terminalReader.init($scope);
@@ -129,7 +136,7 @@ define(['app', 'easyAlgoParser', 'services/fileSystem', 'controllers/popUp', 'co
 		$scope.renamed = function(tab) {
 			tab.renameMode = false;
 			if ($scope.fsSupported && tab.filePath) {
-				$scope.saveAlgo(tab);
+				$scope.renameAlgo(tab);
 			}
 		};
 		
@@ -302,6 +309,20 @@ define(['app', 'easyAlgoParser', 'services/fileSystem', 'controllers/popUp', 'co
 		};
 		
 		/**
+		 * rename the tab file
+		 */
+		$scope.renameAlgo = function(tab) {
+			if (tab.filePath) {
+				fs.removeFile(tab.filePath, function(){
+					tab.filePath = undefined;
+					$scope.saveAlgo(tab);
+				});
+			} else {
+				$scope.saveAlgo(tab);
+			}
+		};
+
+		/**
 		 * save algo on file system
 		 */
 		$scope.saveAlgo = function(tab) {
@@ -327,6 +348,8 @@ define(['app', 'easyAlgoParser', 'services/fileSystem', 'controllers/popUp', 'co
 			);			
 		};
 			
+		// preload instruction template
+		templatePreloader('editorInstructionPopUp.html');
 		$scope.openInstructionPopUp = function(){			
 			$modal.open({
 			  templateUrl: 'editorInstructionPopUp.html',
@@ -378,6 +401,7 @@ define(['app', 'easyAlgoParser', 'services/fileSystem', 'controllers/popUp', 'co
 			);
 		}
 		
+
 		
     })
     .service('promptCreator', [function () {

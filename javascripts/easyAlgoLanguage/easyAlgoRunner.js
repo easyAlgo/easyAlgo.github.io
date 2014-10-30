@@ -19,6 +19,7 @@
  	 * @param output an object for write this object must have 3 methodes error, info, write they have one string parameter
  	 */
  	runner.run = function(expression, output, input, runnerEndFunction) {
+ 		console.log(expression);
  		var FUNCTIONS = easyAlgoConfiguration.getFunctions();		
 		var SKIP_FUNCTION = easyAlgoConfiguration.getSkipedFunction();
 	
@@ -74,7 +75,7 @@
 					} else {						
 						this.haveFatalError();
 						output.error(e);
-						// console.log(e);
+						console.log(e);
 					}
 				}				
 	 		},
@@ -183,6 +184,7 @@
 						}
 						_this.haveFatalError();
 						output.error(e);
+						console.log(e);
 					}
 				}, 0);
 	 		},
@@ -205,6 +207,20 @@
  		 * check the type of the value, if type is bad a runtime exception is throw
  		 */
  		var checkType = function(value, type, offset) {
+ 			if (Array.isArray(type)) {
+ 				var translatedType = [];
+ 				for (var i in type) {
+ 					translatedType.push(typeTranslation[type[i]]);
+ 					try {
+	 					if (checkType(value, type[i], offset)) {
+	 						return true;
+	 					} 						
+ 					} catch(e){}
+ 				}
+
+ 				throw new RuntimeException(value + ' doit être du type ' + translatedType.join(' ou '), offset);
+ 			}
+
  			if (typeof value == type || (type == 'array' && angular.isArray(value))) {
  				return true;
  			}
@@ -314,6 +330,7 @@
 				var variable = context.getValue(expression.name);
 				if (expression.indexs != undefined && expression.indexs.length > 0) {
 					// asynchronius method
+					var indexs = [];
 					forEach(
 						expression.indexs, 
 						function(nextStep, index){
@@ -321,8 +338,12 @@
 								throw new RuntimeException('Vous devez préciser l\'indice de l\'element à accéder.', expression.offset);
 							}
 							evaluateExpression(index, context, blockRunner, function(index) {							
-								checkType(variable, 'array', expression.offset);
+								indexs.push(index);
+								checkType(variable, ['array', 'string'], expression.offset);
 								variable = variable[index];
+								if (variable == undefined) {
+									output.info('La variable ' + expression.name + '[' + indexs.join('][')+ '] n\'est pas initialisée')
+								}
 								nextStep();
 							});
 						},
@@ -333,7 +354,7 @@
 					return;
 				}
 				if (variable == undefined) {
-					output.info('La variable ' + expression.name + (index != undefined ? '['+index+']': '') + ' n\'est pas initialisée')
+					output.info('La variable ' + expression.name + ' n\'est pas initialisée')
 				}
 				callback(variable);
 				return;
@@ -426,6 +447,9 @@
 		 * format value for write value
 		 */
 		var toString = function(value) {
+			if (value == undefined) {
+				return "NON_INITIALISEE";
+			}
 			if (Array.isArray(value)) {
 				var ret = '[';
 				for (var i in value) {
