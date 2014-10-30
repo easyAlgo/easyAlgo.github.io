@@ -9,7 +9,7 @@ require.config({
 		
 		// module shortcut
 		app : '../javascripts/app',
-		angular : 'angular/angular',
+		angular : 'angular/angular.min',
 		angularBootstrap : 'angular-bootstrap/ui-bootstrap-tpls',
 		angularRoute : 'angular-route/angular-route.min',
 		easyAlgoParser : '../javascripts/easyAlgoLanguage/easyAlgoParser',
@@ -75,7 +75,8 @@ require.config({
 		},
 		'tc-angular-chartjs/dist/tc-angular-chartjs' : {
 			deps : [
-				'Chart.js/Chart.min'
+				'Chart.js/Chart.min',
+				'angular'
 			]
 		},
 		app : {
