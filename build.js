@@ -102,6 +102,13 @@ function removeNoProd(file, callback) {
 install('less', function(){buildLessOfHtml('views/index.html')});
 
 removeNoProd('javascripts/main.js', function(){
-	install('uglify-js@1', function(){minify('javascripts')});
+	install('uglify-js@1', function(){
+		install('requirejs', function(){
+			console.log('build : app.js');
+			exec('r.js.cmd -o name=app out=app.js mainConfigFile=main.js', {cwd: __dirname + '/javascripts'}, function(error, data) {
+				minify('javascripts');
+			});
+		});	
+	});
 });
 
