@@ -99,14 +99,26 @@ function removeNoProd(file, callback) {
 }
 
 
+function optimzeRequire(module, callback, exclude) {
+	console.log('build : ' + module);
+	exec('r.js.cmd -o name='+module +(exclude ? ' exclude=' + exclude : '')+ ' out='+module+'.js mainConfigFile=main.js', 
+		{cwd: __dirname + '/javascripts'}, 
+		function(error, data) {
+			console.log('builded : ' + module);
+			callback();
+		}
+	);
+}
+
 install('less', function(){buildLessOfHtml('views/index.html')});
 
 removeNoProd('javascripts/main.js', function(){
 	install('uglify-js@1', function(){
 		install('requirejs', function(){
-			console.log('build : app.js');
-			exec('r.js.cmd -o name=app out=app.js mainConfigFile=main.js', {cwd: __dirname + '/javascripts'}, function(error, data) {
-				minify('javascripts');
+			optimzeRequire('app', function(){
+				optimzeRequire('controllers/easyAlgoEditor', function(){
+					minify('javascripts');
+				}, 'app');
 			});
 		});	
 	});
