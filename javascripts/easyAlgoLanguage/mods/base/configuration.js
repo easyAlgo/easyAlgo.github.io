@@ -1,0 +1,1 @@
+define([],function(){return function(e){return{outputValues:{erreur:"error",info:"info",output:"output"},instructions:{ECRIRE:"write",LIRE:"read",DEFINIR:"define",RETOURNER:"return"}}}});

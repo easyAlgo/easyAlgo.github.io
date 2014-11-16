@@ -1,0 +1,1 @@
+define(["../base/instructions","../base/configuration"],function(e,t){return function(n){var r=t(n);return{instructions:e(r),configuration:r}}});
