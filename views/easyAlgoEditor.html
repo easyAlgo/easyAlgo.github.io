@@ -33,9 +33,25 @@
 		</tabset>
 		<div flow-init flow-drop flow-file-added="fileAdded($file, $event, $flow)" id="button-list">
 			<div ng-if="!dragEnter">
+		
 				<div class="btn-group" >
-					<button type="button" class="btn btn-default" ng-click="runAlgo()" title="Executer l'algorithme"> 
-						<i class="glyphicon glyphicon-cog"></i> <span class="hidden-xs">Executer l'algorithme</span>
+					<div class="btn-group dropup" dropdown ng-show="debugger == undefined">
+						<button type="button" class="btn btn-default" ng-click="runAlgo(false)" title="Executer l'algorithme"> 
+							<i class="glyphicon glyphicon-cog"></i> <span class="hidden-xs">Executer l'algorithme</span>
+						</button>
+						 <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle>
+					        <span class="caret"></span>
+					        <span class="sr-only">Split button!</span>
+					     </button>
+					     <ul class="dropdown-menu" role="menu">
+					        <li><a href="javascript:void(0)" ng-click="runAlgo(true)">Executer en mode pas à pas</a></li>
+					     </ul>
+					</div>
+					<button type="button" class="btn btn-default" ng-click="debugger.next()" title="Prochaine instruction" ng-show="debugger != undefined"> 
+						<i class="glyphicon glyphicon-play"></i> <span class="hidden-xs">Prochaine instruction</span>
+					</button>
+					<button type="button" class="btn btn-default" ng-click="debugger.finish()" title="Prochaine instruction" ng-show="debugger != undefined"> 
+						<i class="glyphicon glyphicon-forward"></i> <span class="hidden-xs">Executer jusqu'a la fin</span>
 					</button>
 					<button type="button" class="btn btn-default" ng-click="clearConsole()" title="Vider la console">
 						<i class="glyphicon glyphicon-trash"></i> <span class="hidden-xs">Vider la console</span>

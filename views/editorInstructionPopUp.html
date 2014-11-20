@@ -5,13 +5,15 @@
 <div class="modal-body row">
 	<!-- selection menu -->
 	<div class="type-selection col-sm-4">
+		<!-- menus -->
 		<accordion close-others="true" ng-show="help == null">
 			<accordion-group is-open="sectionContent.open" ng-repeat="sectionMenus in sections | orderObjectBy:'position':false">
 				<accordion-heading>
+					<i class="{{sectionMenus.icon}}" ng-if="sectionMenus.icon"></i>
 					{{sectionMenus.key}} <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': sectionContent.open, 'glyphicon-chevron-right': !sectionContent.open}"></i>
 				</accordion-heading>
 				<div  
-					ng-if="menuName != 'open' && menuName != 'key' && menuName != 'position'" 
+					ng-if="menuName != 'open' && menuName != 'key' && menuName != 'position' && menuName != 'icon'" 
 					ng-repeat="(menuName, action) in sectionMenus"
 					ng-click="setSelected(action)"
 				>
@@ -19,6 +21,7 @@
 				</div>
 			</accordion-group >
 		</accordion>
+		<!-- help menu -->
 		<div class="panel panel-default" ng-if="help != undefined">			
 			<div ng-id="help.title != undefined" class="panel-heading">
 				<button type="button" class="close" ng-click="closeHelp()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>

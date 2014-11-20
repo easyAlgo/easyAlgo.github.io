@@ -1,0 +1,1 @@
+define(["app"],function(e){e.controller("easyAlgoTutorial",["$scope",function(e){}])});

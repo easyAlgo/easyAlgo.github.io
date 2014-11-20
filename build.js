@@ -91,6 +91,23 @@ function removeNoProd(file, callback) {
 		  data = data.substring(0, startLine) + data.substring(endLine);
 		  noProdIndex = data.indexOf('//$noProd');
 	  }
+	  
+	  // update the config write
+	  // search var config = {
+	  var index = data.indexOf('var config = ');
+	  var startConfig = data.indexOf('{', index);
+	  var endConfig = data.indexOf('};', startConfig);
+	  var config = data.substring(startConfig, endConfig + 1);
+	  
+	  var data = data.substring(0, index) + data.substring(endConfig + 2);
+	  
+	  // require.require(config) line
+	  var requireConfigIndex = data.indexOf('require.config');
+	  var endOfLine = data.indexOf('\n', requireConfigIndex);
+	  var data = data.substring(0, requireConfigIndex) 
+		+ 'require.config('+config+');'
+		+ data.substring(endOfLine);	 
+	  
 	  // update file
 	  fs.writeFileSync(file, data); 
 	  console.log('//$nodeProd removed on ' + file);
@@ -101,10 +118,10 @@ function removeNoProd(file, callback) {
 
 function optimzeRequire(module, callback, exclude) {
 	console.log('build : ' + module);
+	console.log('r.js.cmd -o name='+module +(exclude ? ' exclude=' + exclude : '')+ ' out='+module+'.js mainConfigFile=main.js');
 	exec('r.js.cmd -o name='+module +(exclude ? ' exclude=' + exclude : '')+ ' out='+module+'.js mainConfigFile=main.js', 
 		{cwd: __dirname + '/javascripts'}, 
 		function(error, data) {
-			console.log('builded : ' + module);
 			callback();
 		}
 	);
