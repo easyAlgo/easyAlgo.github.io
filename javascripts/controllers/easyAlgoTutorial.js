@@ -1,1 +1,1 @@
-define(["app"],function(e){e.controller("easyAlgoTutorial",["$scope",function(e){}])});
+define(["app","ssaService/courseService"],function(e){e.controller("easyAlgoTutorial",["$scope",function(e){}])});

@@ -1,4 +1,4 @@
-﻿<div flow-prevent-drop flow-drag-enter="dragEnter = true" flow-drag-leave="dragEnter = false">
+<div flow-prevent-drop flow-drag-enter="dragEnter = true" flow-drag-leave="dragEnter = false">
 	<div id="editorPane">
 		<tabset>
 			<tab ng-repeat="tab in tabs" active="tab.active" select="setTerminalState('close', tab)">	
@@ -21,7 +21,28 @@
 					ng-click="removeTab($index)">
 				</i>
 		      </tab-heading>
-			  <textarea ui-codemirror="editorConfiguration(tab)" ui-refresh="tab.active" ng-model="tab.content"></textarea>
+			  
+
+		      <!-- body tabs -->
+		      <div class="body-tabs">
+
+
+			  	<div 
+			  		class="course-content"			  		
+			  		style="float : right" 
+			  		ng-if="tab.course"
+			  		ng-click="state.terminal != 'close' && setTerminalState('pause')"
+			  		ng-class="{'close' : !state.course}"
+		  		>
+		  			<div class="btn toogle" ng-click="state.course = !state.course ">
+		  				<i class="fa"></i>
+		  			</div>
+
+		  			<div class="course" markdown="tab.course.text" ></div>
+			  	</div>
+
+			  	<textarea ui-codemirror="editorConfiguration(tab)" ui-refresh="tab.active" ng-model="tab.content"></textarea>
+		      </div>
 			  
 
 			</tab>
@@ -44,7 +65,7 @@
 					        <span class="sr-only">Split button!</span>
 					     </button>
 					     <ul class="dropdown-menu" role="menu">
-					        <li><a href="javascript:void(0)" ng-click="runAlgo(true)">Executer en mode pas à pas</a></li>
+					        <li><a href="javascript:void(0)" ng-click="runAlgo(true)"><i class="fa fa-bug"></i> Executer en mode pas à pas</a></li>
 					     </ul>
 					</div>
 					<button type="button" class="btn btn-default" ng-click="debugger.next()" title="Prochaine instruction" ng-show="debugger != undefined"> 

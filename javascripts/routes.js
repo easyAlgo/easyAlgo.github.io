@@ -1,1 +1,1 @@
-define([],function(){return{defaultRoutePath:"/",routes:{"/":{controller:"easyAlgoEditor",dependencies:["controllers/easyAlgoEditor","directives/directives"]},"/tuto":{controller:"easyAlgoTutorial",dependencies:["controllers/easyAlgoTutorial"]}}}});
+define([],function(){var e="easyAlgoEditor",t="controllers/easyAlgoEditor";return{defaultRoutePath:"/",routes:{"/":{controller:e,dependencies:[t]},"/tuto":{controller:"easyAlgoTutorial",dependencies:["controllers/easyAlgoTutorial"]},"/tuto/:courseName":{controller:e,dependencies:[t]}}}});

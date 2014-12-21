@@ -1,4 +1,4 @@
-﻿<div class="modal-header">
+<div class="modal-header">
 	<button type="button" class="close" ng-click="close(true)"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	<h3 class="modal-title"> Ajout d'une instruction <span ng-if="selected.title"> > {{selected.title}}</span> </h3>
 </div>
@@ -141,7 +141,7 @@
 			</div>
 			
 			<!-- cas de l'affectation d'une variable -->
-			<div ng-if="selected.id == 'afectation'">
+			<div ng-if="selected.id == 'affectation'">
 				<div class="alert alert-info" role="alert"> 
 					L'affectation permet de modifier la valeur d'une variable. Un affectation affecte une expression à une variable, une expression peut être un calcul, une chaine de caractére, une autre variable, etc...
 				</div>
