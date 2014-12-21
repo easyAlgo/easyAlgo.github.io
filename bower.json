@@ -9,6 +9,7 @@
     "angular-route": "1.2.26",
     "idb.filesystem.js": "ebidel/idb.filesystem.js",
     "ng-flow": "latest",
-    "tc-angular-chartjs": "latest"
+    "tc-angular-chartjs": "latest",
+    "pagedown-extra" : "latest"
   }
 }
