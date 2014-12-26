@@ -1,2 +1,0 @@
-// a syntaxique validator for easyAlgo
-define(["easyAlgoConfiguration","easyAlgoParser"],function(e,t){var n=function(e,n){var r=[];parsing=!0;var i=function(e,t,n,i){r.push({from:t,to:n,message:e,severity:i})};try{var s=new t,o=s.parse(e);for(var u in o.errors){var a=o.errors[u];console.log(a),i(a.toString(),a.getStart(),a.getEnd(),a.getSeverity())}}catch(f){console.log(f),r.push({from:CodeMirror.Pos(f.line-1,f.column-1),to:CodeMirror.Pos(f.line-1,f.column),message:f.message,severity:"error"})}return r};return{validate:function(e,t){return t=t==undefined?!0:t,n(e,t)}}});

@@ -127,6 +127,31 @@ function optimzeRequire(module, callback, exclude) {
 	);
 }
 
+function removeFile(file) {
+	var stats = fs.statSync(file);
+	if (stats.isDirectory()) {
+		console.log('remove directory ' + file);			
+		var files = fs.readdirSync(file);
+		for(var i in files) {
+		   var definition = removeFile(file+'/'+files[i]);
+		}
+		fs.rmdirSync(file);
+	} else {
+		console.log('remove file ' + file);			
+		fs.unlinkSync(file);
+	}
+}
+
+function clearJsDirectory(callback) {
+	var toRemove = ['javascripts/terminalEmulator','javascripts/services', 'javascripts/easyAlgoLanguage', 'javascripts/directives', 'javascripts/routes.js'];
+	
+	for (var i in toRemove) {
+		removeFile(toRemove[i]);		
+	}
+		
+	callback();
+}
+
 install('less', function(){buildLessOfHtml('views/index.html')});
 
 removeNoProd('javascripts/main.js', function(){
@@ -134,7 +159,9 @@ removeNoProd('javascripts/main.js', function(){
 		install('requirejs', function(){
 			optimzeRequire('app', function(){
 				optimzeRequire('controllers/easyAlgoEditor', function(){
-					minify('javascripts');
+					clearJsDirectory(function(){						
+						minify('javascripts');
+					});
 				}, 'app');
 			});
 		});	

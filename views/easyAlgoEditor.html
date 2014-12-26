@@ -58,27 +58,27 @@
 				<div class="btn-group" >
 					<div class="btn-group dropup" dropdown ng-show="debugger == undefined">
 						<button type="button" class="btn btn-default" ng-click="runAlgo(false)" title="Executer l'algorithme"> 
-							<i class="glyphicon glyphicon-cog"></i> <span class="hidden-xs">Executer l'algorithme</span>
+							<i class="glyphicon glyphicon-cog"></i> <span class="hidden-xs">Exécuter l'algorithme</span>
 						</button>
 						 <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle>
 					        <span class="caret"></span>
 					        <span class="sr-only">Split button!</span>
 					     </button>
 					     <ul class="dropdown-menu" role="menu">
-					        <li><a href="javascript:void(0)" ng-click="runAlgo(true)"><i class="fa fa-bug"></i> Executer en mode pas à pas</a></li>
+					        <li><a href="javascript:void(0)" ng-click="runAlgo(true)"><i class="fa fa-bug"></i> Exécuter en mode pas à pas</a></li>
 					     </ul>
 					</div>
 					<button type="button" class="btn btn-default" ng-click="debugger.next()" title="Prochaine instruction" ng-show="debugger != undefined"> 
 						<i class="glyphicon glyphicon-play"></i> <span class="hidden-xs">Prochaine instruction</span>
 					</button>
 					<button type="button" class="btn btn-default" ng-click="debugger.finish()" title="Prochaine instruction" ng-show="debugger != undefined"> 
-						<i class="glyphicon glyphicon-forward"></i> <span class="hidden-xs">Executer jusqu'a la fin</span>
+						<i class="glyphicon glyphicon-forward"></i> <span class="hidden-xs">Exécuter jusqu'a la fin</span>
 					</button>
 					<button type="button" class="btn btn-default" ng-click="clearConsole()" title="Vider la console">
 						<i class="glyphicon glyphicon-trash"></i> <span class="hidden-xs">Vider la console</span>
 					</button>
 					<button type="button" class="btn btn-default" ng-click="stopAlgo()" title="Stoper l'algorithme" ng-disabled="running == false"> 
-						<i class="glyphicon glyphicon-ban-circle"></i> <span class="hidden-xs">Stoper l'algorithme</span>
+						<i class="glyphicon glyphicon-ban-circle"></i> <span class="hidden-xs">Stopper l'algorithme</span>
 					</button>
 				</div>
 
@@ -87,7 +87,7 @@
 						<i class="glyphicon glyphicon-floppy-disk"></i> <span class="hidden-xs">Enregistrer</span>
 					</button>
 					<a class="btn btn-default" download="{{downloadAlgoFileName}}.easyAlgo" ng-click="downloadAlgo()" ng-href="{{downloadAlgoUrl}}" title="Telecharger">
-						<i class="glyphicon glyphicon-download"></i> <span class="hidden-xs">Telecharger</span>
+						<i class="glyphicon glyphicon-download"></i> <span class="hidden-xs">Télécharger</span>
 					</a>
 					<span class="btn btn-default" flow-btn title="Uploader" >
 						<i class="glyphicon glyphicon-upload"></i> <span class="hidden-xs" >Uploader </span>

@@ -1,3 +1,0 @@
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-(function(e){var t="object",n="codemirror/lib/codemirror";typeof exports==t&&typeof module==t?e(require(n)):typeof define=="function"&&define.amd?define([n,"easyAlgoConfiguration"],e):e(CodeMirror)})(function(e,t){"use strict";var n="getLine",r="toUpperCase",i=t.getStartToLastEndBlock();e.registerHelper("fold","easyAlgo",function(t,s){var o=t[n](s.line),u=o.trim().split(" ")[0][r]();if(!(u in i))return;var a=i[u],f=1,l=t.lastLine();for(var c=s.line+1;c<=l&&f>0;++c){var h=t[n](c).trim(),p=h.split(" "),d=p[0][r]();a.indexOf(d)>=0&&f--,d==u&&f++}c-=2;if(f==0)return{from:e.Pos(s.line,o.length),to:e.Pos(c,t[n](c).length)}})});

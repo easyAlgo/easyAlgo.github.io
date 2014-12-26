@@ -1,1 +1,0 @@
-define(["app"],function(e){e.factory("templatePreloader",["$http","$injector","$templateCache",function(e,t,n){return function(t){e.get(t,{cache:n}).then(function(e){return e.data})}}])});

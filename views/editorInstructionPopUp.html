@@ -16,6 +16,7 @@
 					ng-if="menuName != 'open' && menuName != 'key' && menuName != 'position' && menuName != 'icon'" 
 					ng-repeat="(menuName, action) in sectionMenus"
 					ng-click="setSelected(action)"
+					class="cursor"
 				>
 					{{menuName}} 
 				</div>
@@ -121,7 +122,7 @@
 					<div class="col-sm-7">
 						<input type="text" id="message" ng-model="selected.message" name="message" class="form-control"/>
 						<div class="help-block">
-							un simple message text
+							un simple message texte
 						</div>
 					</div>
 				</div>
@@ -134,7 +135,7 @@
 							<option value="{{name}}" ng-repeat="(name, _) in configuration.writeOutput()"> {{name}} </option>
 						</select>
 						<div class="help-block">
-							La sortie permet d'affiche le message dans différentes couleurs, blanc par défaut, rouge sur la sortie erreur, vert sur la sortie info
+							La sortie permet d'afficher le message dans différentes couleurs, blanc par défaut, rouge sur la sortie erreur, vert sur la sortie info
 						</div>
 					</div>
 				</div>
@@ -292,7 +293,7 @@
 			<!-- cas de la structure conditionnel -->
 			<div ng-if="selected.id == 'if'">
 				<div class="alert alert-info" role="alert"> 
-					Un condition permet d'executer une portion en code en fonction d'un test. Si le test est vrai alors la premiére portion de code est executé, si non les instructions sous le "si_non" sont executées.
+					Une condition permet d'exécuter une portion en code en fonction d'un test. Si le test est vrai alors la premiére portion de code est exécutée, sinon les instructions sous le "si_non" sont exécutées.
 				</div>
 
 				<!-- test du si -->
@@ -313,7 +314,7 @@
 				    <label>
 				      <input type="checkbox" ng-model="selected.elseBlock"> Ajouter un bloc SI_NON
 				    </label>
-				    <span class="help-block">Si cette case est coché un block SI_NON va être ajouté. Le block SI_NON est executé si le test est faux. </span>
+				    <span class="help-block">Si cette case est cochée un bloc SI_NON va être ajouté. Le bloc SI_NON sera exécuté si le test est faux. </span>
 					
 				</div>
 			</div>			
@@ -321,7 +322,7 @@
 			<!-- cas de la boucle tant que -->
 			<div ng-if="selected.id == 'while'">
 				<div class="alert alert-info" role="alert"> 
-					Une boucle tant_que premet d'executer une suite de ligne plusieurs fois. Le nombre de fois est conditionnée par une condition, la boucle s'arréte quad la condition passe à faux.
+					Une boucle tant_que premet d'exécuter une suite de ligne plusieurs fois. Le nombre de fois est conditionné par un test, la boucle s'arréte quad la condition passe à faux.
 				</div>
 
 				<!-- test du si -->
@@ -330,7 +331,7 @@
 					<div class="col-sm-7">
 						<input name="test" class="form-control" id="test" ng-model="selected.test" required/>
 						<span class="eror help-block" ng-show="isValidated && insForm.test.$error.required">Obligatoire</span>
-						<span class="help-block">Tant que cette condition vaux vrai le code du tant_que est executé.</span>
+						<span class="help-block">Tant que cette condition vaux vrai le code du tant_que est exécuté.</span>
 					</div>
 				</div>
 			</div>
@@ -338,7 +339,7 @@
 			<!-- cas de la boucle foreach -->
 			<div ng-if="selected.id == 'foreach'">
 				<div class="alert alert-info" role="alert"> 
-					Cette boucle permet de parcourir les valeurs un tableau.
+					Cette boucle permet de parcourir les valeurs d'un tableau.
 				</div>
 
 				<!-- variable à parcourir -->
@@ -361,7 +362,7 @@
 					<div class="col-sm-7">
 						<input type="text" name="varname" class="form-control" id="varname" ng-model="selected.varname" required />
 						<span class="eror help-block" ng-show="isValidated && insForm.varname.$error.required">Obligatoire</span>
-						<span class="help-block">Le nom de la variable ou seront stockée les valeurs du tableau.</span>
+						<span class="help-block">Le nom de la variable où seront stockées les valeurs du tableau.</span>
 					</div>
 				</div>
 			</div>
@@ -369,7 +370,7 @@
 			<!-- cas de la boucle for -->
 			<div ng-if="selected.id == 'for'">
 				<div class="alert alert-info" role="alert"> 
-					Cette boucle de réaliser un parcourt entre deux nombre.
+					Cette boucle de réaliser un parcours entre deux nombres.
 				</div>
 
 				<!-- variable à parcourir -->
@@ -408,7 +409,7 @@
 					<div class="col-sm-7">
 						<input type="text" name="step" class="form-control" id="step" ng-model="selected.step" />
 						<span class="eror help-block" ng-show="isValidated && insForm.step.$error.required">Obligatoire</span>
-						<span class="help-block">Le pas de la boucle définie le saut éfféctuer à chaque étape. Si aucune valeur n'est indiquée un pas de 1 est appliqué. Par exemple une boucle de 1 à 3 avec un pas de 0.5 vas prendre les valeurs : 1, 1.5, 2, 2.5, 3.</span>
+						<span class="help-block">Le pas de la boucle définit le saut effectué à chaque étape. Si aucune valeur n'est indiquée, un pas de 1 est appliqué. Par exemple une boucle de 1 à 3 avec un pas de 0.5 va prendre les valeurs : 1, 1.5, 2, 2.5, 3.</span>
 					</div>
 				</div>
 			</div>

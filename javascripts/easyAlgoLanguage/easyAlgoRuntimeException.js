@@ -1,1 +1,0 @@
-define([],function(){var e="offset",t=function(t,n){this.message=t,this[e]=n,this.name="RuntimeException"};return t.prototype={toString:function(t){var n=undefined;if(this[e])if(t){var r=this[e];r.begin&&(r=r.begin);var i=t.posFromIndex(r);n="(ligne : "+(i.line+1)+", colonne : "+i.ch+")"}else n="(caract�re : "+this[e]+")";return this.message+(n?n:"")}},t});
