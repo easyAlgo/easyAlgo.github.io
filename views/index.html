@@ -20,6 +20,7 @@
 	
 	</head>
 	<body>
+		
 		<!-- navbar du site -->
 		<nav class="navbar navbar-default" role="navigation" ng-controller="headerController">
 			<div class="container-fluid">
@@ -46,11 +47,19 @@
 					</ul>
 				</div>
 			</div>
+			
+			<!-- loading bar, show when ajax or url change event -->
+			<div class="animation-on-change" animate-on-change-url>		
+				<div class="bubble"></div>
+				<div class="bubble"></div>
+				<div class="bubble"></div>
+				<div class="bubble"></div>
+			</div>
 		</nav>
 	
 		
-		<!-- site content -->
-		<div class="content" ng-view>
+		<!-- site content -->		
+		<div class="content" ng-view >
 			Patientez chargement en cours...
 		</div>
 	</body>

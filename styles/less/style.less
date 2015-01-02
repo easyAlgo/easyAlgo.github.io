@@ -1,0 +1,301 @@
+@import "bootstrap_extended/bootstrap.less";
+
+
+.glyphicon.button {
+	cursor : pointer;
+	&:hover {
+		font-size : 1.1em;
+	}
+}
+
+
+.dropArrea {
+	border-radius : 5px;
+	border: 2px #f1f1f1 dashed;
+	background-color: #5CB85C;
+	color : white;
+	font-weight : bold;
+	size : 1.2em;
+	width : 100%;
+	text-align : center;
+	padding : 10px;
+}
+
+.cursor {
+	cursor : pointer;
+}
+
+.btn.btn-default input[type=file] {
+	top : 0px;
+}
+
+.terminal, .CodeMirror.cm-s-default,
+.course {
+	transition : 200ms;
+}
+
+.currently-running {
+	background-color : rgb(236, 236, 55);
+}
+
+.perso-font.var {
+	&:before {
+		content : 'var';
+		font-style: italic;
+		font-weight : bold;
+	}
+}
+
+.perso-font.fdex {
+	&:before {
+		content : 'f(x)';
+		font-style: italic;
+		font-weight : bold;		
+	}
+}
+
+// code mirror are auto sizing for course part
+/** right part of the editor, course show */
+.course-content {
+	position : relative;
+	transition : 200ms;
+	width : 50%;
+
+	background-color : @course-background-color;
+
+	/* ombre */
+	-moz-box-shadow: inset 8px 0px 8px -10px #000000;
+	-webkit-box-shadow: inset 8px 0px 8px -10px #000000;
+	-o-box-shadow: inset 8px 0px 8px -10px #000000;
+	box-shadow: inset 8px 0px 8px -10px #000000;
+	filter:progid:DXImageTransform.Microsoft.Shadow(color=#000000, Direction=90, Strength=8);
+
+	&.close {
+		overflow : hidden;
+		width : 25px;
+
+		.toogle .fa::before {
+			content : '<';
+		}
+	}
+
+	.toogle {
+		position : absolute;
+		left : 0;
+		top : 48%;
+		transition : 200ms;
+		
+		padding-left: 5px;
+		padding-right: 5px;
+
+		.fa::before {
+			content : '>';
+			font-weight : bold;
+			color : rgba(128, 128, 128, 0.58);
+		}
+
+		&:hover {
+			border-color: rgba(128,128,128,0.08);
+			background-color: #f0f0f0;
+			color: #343434;
+		}
+	}
+
+	.course {
+		overflow : auto;
+		padding-left : 28px;
+
+		.CodeMirror-scroll {
+			background-color : @course-background-color;	
+		}
+
+		.CodeMirror {
+		  height: auto;
+		}
+
+		.CodeMirror-scroll {
+		  overflow-y: hidden;
+		  overflow-x: auto;
+		}
+
+		.help {
+			.title {
+				font-weight : bold;
+				color : #7775D2;
+
+				&.open {
+					color : green;
+				}
+			}
+
+			.content {
+				padding-left: 10px;
+				margin-left : 10px;
+				border-left: 3px solid green;
+				border-radius: 2px;
+				padding-top : 5px;
+			}
+		}
+	}
+}
+
+/** title of the bloc course on tuto page */
+.course-tile {
+	background-color : #ecf0f1;
+	border : 1px solid #A0A0A8;
+	border-bottom : none;
+	border-radius : 5px;
+	overflow : hidden;
+
+	/** all link in the block */
+	a {
+		display : block;
+		padding-top : 3px;
+		padding-bottom : 3px;
+		padding-left : 15px;
+		border-bottom: 1px solid #A0A0A8;
+		transition : 300ms;
+		text-decoration: none;
+		color : #7f8c8d;
+
+		i {
+			color : black;
+		}
+
+		/** all other links without the first */
+		&.course {	
+			padding-left : 5px;	
+			font-size : 1.2em;		
+		}
+
+		&:hover {
+			background-color : #bdc3c7;
+			color : #ecf0f1;
+		}
+	}
+}
+
+
+.course-section {
+	margin-top : 10px;
+}
+
+/** code mirror extends, for function show */
+.cm-function {
+	color : rgb(119, 104, 252);
+}
+
+.CodeMirror-hints li.prefixed {
+	display : block;
+
+	&:before {
+		color : gray;
+		padding-right : 5px;
+	}
+
+
+	&.hint-keyword {
+		&:before {
+			.glyphicon;
+		}
+
+		.glyphicon-cog;
+	}
+
+	&.hint-atoms {
+		&:before {
+			.glyphicon;
+		}
+		.glyphicon-wrench;
+	}
+
+	&.hint-function {
+		.perso-font.fdex;
+	}
+
+
+	&.hint-var {
+		.perso-font.var;
+	}
+}
+
+
+
+
+
+
+
+.animation-on-change {
+	height : 7px;
+	width : 100%;
+	background-color : #e74c3c;
+	display : none;
+	position : fixed;
+	top : 0;
+	left : 0;
+	
+	&.loading {
+		display : block;
+	}
+	
+	.bubble {
+		transform-origin: center center;
+		border-radius : 20px;
+		height : 6px;
+		width : 6px;
+		display: inline-block;
+		background-color : black;
+		position : absolute;
+	}
+
+	.bubble:nth-child(1) {
+	  animation: expand 7s ease-in-out infinite;
+	  -webkit-animation: expand 7s ease-in-out infinite;
+	  background: #f1c40f;
+	}
+
+	.bubble:nth-child(2) {
+	  animation: expand 8s ease-in-out infinite;
+	  -webkit-animation: expand 8s ease-in-out infinite;
+	  animation-delay: 180ms;
+	  -webkit-animation-delay: 180ms;
+	  background: #3498db;
+	}
+
+	.bubble:nth-child(3) {
+	  animation: expand 9s ease-in-out infinite;
+	  -webkit-animation: expand 9s ease-in-out infinite;
+	  animation-delay: 360ms;
+	  -webkit-animation-delay: 360ms;
+	  background: #bdc3c7;
+	}
+
+	.bubble:nth-child(4) {
+	  animation: expand 10s ease-in-out infinite;
+	  -webkit-animation: expand 10s ease-in-out infinite;
+	  animation-delay: 540ms;
+	  -webkit-animation-delay: 540ms;
+	  background: #9b59b6;
+	}
+
+	
+	.loading-animation-mixin() {
+	  0% {
+		left : 0;
+		width : 5px;
+	  }
+	  50% {
+		width : 25px;
+	  }
+	  100% {
+		left : 100%;
+		width : 5px;
+	  }
+	}
+
+	@-webkit-keyframes expand {.loading-animation-mixin;}
+	@-moz-keyframes expand {.loading-animation-mixin;}
+	@-ms-keyframes expand {.loading-animation-mixin;}
+	@-o-keyframes expand {.loading-animation-mixin;}
+	@keyframes expand {.loading-animation-mixin;}
+}
