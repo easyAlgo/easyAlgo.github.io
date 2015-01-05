@@ -32,7 +32,7 @@
 			  		style="float : right" 
 			  		ng-if="tab.course"
 			  		ng-click="state.terminal != 'close' && setTerminalState('pause')"
-			  		ng-class="{'close' : !state.course}"
+			  		ng-class="{'close' : !state.course, 'active' : tab.active}"
 		  		>
 		  			<div class="btn toogle" ng-click="state.course = !state.course ">
 		  				<i class="fa"></i>
