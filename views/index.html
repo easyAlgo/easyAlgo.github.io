@@ -19,7 +19,7 @@
 		<script type="text/javascript" src="../bower_components/requirejs/require.js" data-main="../javascripts/main.js"> </script>
 	
 	</head>
-	<body>
+	<body ng-class="{hideOverflow : $location.$$url != '/tuto'}" ng-controller="headerController">
 		
 		<!-- navbar du site -->
 		<nav class="navbar navbar-default" role="navigation" ng-controller="headerController">
