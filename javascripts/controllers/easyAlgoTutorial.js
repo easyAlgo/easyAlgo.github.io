@@ -1,1 +1,0 @@
-define(["app","ssaService/courseService"],function(e){e.controller("easyAlgoTutorial",["$scope",function(e){}])});
